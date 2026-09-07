@@ -17,4 +17,9 @@ const friendSchema = new mongoose.Schema({
     }
 }, { timestamps: true })
 
+// Indexes for high concurrency friend requests & status queries
+friendSchema.index({ from: 1, to: 1 })
+friendSchema.index({ to: 1, accepted: 1 })
+friendSchema.index({ from: 1, accepted: 1 })
+
 module.exports = mongoose.model('Friend', friendSchema)

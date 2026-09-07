@@ -30,7 +30,9 @@ const listSchema = new mongoose.Schema({
     }
 }, { timestamps: true })
 
-// one anime per user, no duplicates
+// Indexes for high concurrency lookups
 listSchema.index({ user: 1, anime: 1 }, { unique: true })
+listSchema.index({ user: 1, watchStatus: 1 })
+listSchema.index({ anime: 1 })
 
 module.exports = mongoose.model('Watchlist', listSchema)

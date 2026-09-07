@@ -49,10 +49,23 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    warningsCount: {
+        type: Number,
+        default: 0
+    },
+    warningsHistory: [{
+        reason: String,
+        message: String,
+        date: { type: Date, default: Date.now }
+    }],
     lastSeen: {
         type: Date,
         default: Date.now
-    }
+    },
+    blockedUsers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }]
 }, { timestamps: true })
 
 // hash before save - only if password changed

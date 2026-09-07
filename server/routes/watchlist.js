@@ -7,7 +7,7 @@ const router = express.Router()
 // GET /api/watchlist - my list
 router.get('/', requireLogin, async (req, res) => {
     try {
-        const myList = await Watchlist.find({ user: req.user._id }).populate('anime')
+        const myList = await Watchlist.find({ user: req.user._id }).populate('anime').lean()
         res.json({ ok: true, data: myList })
     } catch(err) {
         res.status(500).json({ ok: false, msg: err.message })

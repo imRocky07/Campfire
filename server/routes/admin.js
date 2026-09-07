@@ -41,11 +41,30 @@ router.put('/ban/:id', requireLogin, adminOnly, async (req, res) => {
         if (!target) return res.status(404).json({ ok: false, msg: 'user not found' })
 
         target.banned = !target.banned
-        if (target.banned) target.status = 'offline'
+        if (target.banned) {
+            target.status = 'offline'
+        } else {
+            target.warningsCount = 0
+        }
         await target.save()
 
         const action = target.banned ? 'banned' : 'unbanned'
         res.json({ ok: true, data: target, msg: `user ${action}` })
+    } catch(err) {
+        res.status(500).json({ ok: false, msg: err.message })
+    }
+})
+
+// POST /api/admin/sync-rankings - manually trigger rankings sync
+router.post('/sync-rankings', requireLogin, adminOnly, async (req, res) => {
+    try {
+        const updater = require('../services/rankingUpdater')
+        const result = await updater.updateRankings()
+        if (result.ok) {
+            res.json({ ok: true, msg: `Rankings updated successfully! Updated: ${result.updated}, Created: ${result.created}` })
+        } else {
+            res.status(500).json({ ok: false, msg: result.error || 'Failed to update rankings' })
+        }
     } catch(err) {
         res.status(500).json({ ok: false, msg: err.message })
     }

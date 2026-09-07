@@ -14,9 +14,43 @@
 ════════════════════════════════════════ -->
 <nav id="navbar" class="hidden">
     <div class="nav-inner">
-        <div class="nav-brand" onclick="goPage('home')">
-            <div class="nav-flame">🔥</div>
-            <span class="nav-name">Camp<span>fire</span></span>
+        <div class="nav-brand-wrap" style="display:flex;align-items:center;gap:14px">
+            <div class="nav-brand" onclick="goPage('home')">
+                <div class="nav-flame" id="nav-flame-icon"><span class="fire-emoji">🔥</span></div>
+                <div style="display:flex;flex-direction:column;justify-content:center;line-height:1">
+                    <span class="nav-name" style="line-height:1.1">Camp<span>fire</span></span>
+                    <span id="nav-sub-brand" style="font-size:10px;font-weight:900;color:var(--orange);letter-spacing:0.18em;text-transform:uppercase;margin-top:1px">Anime</span>
+                </div>
+            </div>
+
+            <!-- Nested Option Hub Switcher Dropdown -->
+            <div class="relative" id="hub-menu-wrap">
+                <button class="hub-trigger-btn" id="hub-trigger-btn" onclick="toggleHubMenu(event)" title="Choose Hub (Anime / Gaming)">
+                    <span id="hub-trigger-icon">🔥</span>
+                    <span id="hub-trigger-text" style="font-weight:800;font-size:12px;letter-spacing:0.02em">Anime Hub</span>
+                    <span class="hub-trigger-arrow" id="hub-trigger-arrow">▾</span>
+                </button>
+
+                <div class="hub-nested-menu" id="hub-nested-menu">
+                    <div class="hub-nested-header">Select Hub Option</div>
+                    <a href="#anime" class="hub-nested-item active" id="hub-item-anime" onclick="selectHubFromMenu('anime', event)">
+                        <div class="hub-item-icon">🔥</div>
+                        <div class="hub-item-info">
+                            <div class="hub-item-title">Anime Hub</div>
+                            <div class="hub-item-sub">Discover, Watchlist & AI Recs</div>
+                        </div>
+                        <span class="hub-item-check" id="hub-check-anime">✓</span>
+                    </a>
+                    <a href="#gaming" class="hub-nested-item" id="hub-item-gaming" onclick="selectHubFromMenu('gaming', event)">
+                        <div class="hub-item-icon">🎮</div>
+                        <div class="hub-item-info">
+                            <div class="hub-item-title">Gaming Hub</div>
+                            <div class="hub-item-sub">Games, RAWG & Library</div>
+                        </div>
+                        <span class="hub-item-check hidden" id="hub-check-gaming">✓</span>
+                    </a>
+                </div>
+            </div>
         </div>
 
         <div class="nav-links">
@@ -38,7 +72,10 @@
                         <p id="dd-name">—</p>
                         <span id="dd-email">—</span>
                     </div>
+                    <div class="dd-item" onclick="openProfileModal();toggleDD()">⚙️ Profile Settings</div>
                     <div class="dd-item" onclick="goPage('watchlist');toggleDD()">📚 My Watchlist</div>
+                    <div class="dd-item" onclick="openAnalyticsModal();toggleDD()">📊 Dashboard</div>
+                    <div class="dd-item" onclick="goPage('help');toggleDD()">❓ Help & Feedback</div>
                     <div class="dd-item red" onclick="logout()">🚪 Sign Out</div>
                 </div>
             </div>
@@ -182,7 +219,10 @@
     <div class="page active" id="pg-home">
         <!-- Hero -->
         <div class="hero" id="hero">
-            <div class="hero-bg" id="hero-bg"></div>
+            <div class="hero-bg-wrap">
+                <div class="hero-bg" id="hero-bg-1"></div>
+                <div class="hero-bg" id="hero-bg-2"></div>
+            </div>
             <div class="hero-fade1"></div>
             <div class="hero-fade2"></div>
 
@@ -190,55 +230,92 @@
             <div class="hero-minis" id="hero-minis"></div>
 
             <div class="hero-content">
-                <div class="hero-tag" id="hero-tag">🔥 Trending #1</div>
-                <h1 class="hero-title" id="hero-title">Loading...</h1>
-                <p class="hero-alttitle" id="hero-alt"></p>
-                <div class="hero-meta" id="hero-meta"></div>
-                <p class="hero-desc" id="hero-desc"></p>
-                <div class="hero-btns">
-                    <button class="btn btn-p" onclick="openDetail(currentHeroAnime)">▶ View Details</button>
-                    <button class="btn btn-g" id="hero-wl-btn" onclick="heroAddWatchlist()">+ Add to Watchlist</button>
+                <div class="hero-text-side">
+                    <div class="hero-tag" id="hero-tag">#1 Spotlight</div>
+                    <h1 class="hero-title" id="hero-title">Loading...</h1>
+                    <p class="hero-alttitle" id="hero-alt"></p>
+                    <div class="hero-meta" id="hero-meta"></div>
+                    <p class="hero-desc" id="hero-desc"></p>
+                    <div class="hero-btns">
+                        <button class="btn btn-watch" onclick="openDetail(currentHeroAnime)">Detail &gt;</button>
+                        <button class="btn btn-detail" id="hero-wl-btn" onclick="heroAddWatchlist()">+ Watchlist</button>
+                    </div>
+                    <div class="hero-dots" id="hero-dots"></div>
                 </div>
             </div>
-        </div>
 
-        <!-- Stats strip -->
-        <div class="stats-strip">
-            <div class="stats-inner">
-                <div class="sitem"><div class="sitem-val" id="stat-anime">—</div><div class="sitem-lbl">Anime</div></div>
-                <div class="sitem"><div class="sitem-val">10K+</div><div class="sitem-lbl">Members</div></div>
-                <div class="sitem"><div class="sitem-val">50K+</div><div class="sitem-lbl">Reviews</div></div>
-                <div class="sitem"><div class="sitem-val">200K+</div><div class="sitem-lbl">Watchlists</div></div>
+            <!-- Stacked chevron arrows at bottom right -->
+            <div class="hero-arrows">
+                <button class="harrow-btn" onclick="nextHeroSlide()" title="Next Slide">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+                <button class="harrow-btn" onclick="prevHeroSlide()" title="Previous Slide">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
             </div>
-        </div>
-
-        <!-- Trending -->
-        <div class="sec">
-            <div class="sechead">
-                <span class="sectitle">🔥 Trending This Season</span>
-                <span class="seclink" onclick="goPage('discover')">See all →</span>
-            </div>
-            <div class="ag" id="trending-grid"></div>
         </div>
 
         <!-- Genre cards -->
-        <div class="sec" style="padding-top:0">
+        <div class="sec">
             <div class="sechead"><span class="sectitle">✨ Browse by Genre</span></div>
             <div class="genregrid" id="genre-grid"></div>
         </div>
 
-        <!-- Popular -->
+        <!-- AI Recommendations -->
+        <div class="sec" style="padding-top:0" id="ai-recs-section">
+            <div class="sechead">
+                <div style="display:flex;align-items:center;gap:8px">
+                    <span class="sectitle">🤖 Recommended For You</span>
+                    <span class="ai-sparkle-badge">AI Personalized</span>
+                </div>
+                <span class="seclink" id="see-all-recommendations" onclick="toggleHomeSection('recommendations')">See all &rarr;</span>
+            </div>
+            <div class="ag" id="recommendations-grid"></div>
+        </div>
+
+        <!-- Trending -->
         <div class="sec" style="padding-top:0">
             <div class="sechead">
-                <span class="sectitle">⭐ All-Time Popular</span>
-                <span class="seclink" onclick="goPage('discover')">See all →</span>
+                <span class="sectitle">🔥 Trending Now</span>
+                <span class="seclink" id="see-all-trending" onclick="toggleHomeSection('trending')">See all →</span>
+            </div>
+            <div class="ag" id="trending-grid"></div>
+        </div>
+
+        <!-- Most Popular -->
+        <div class="sec" style="padding-top:0">
+            <div class="sechead">
+                <span class="sectitle">⭐ Most Popular</span>
+                <span class="seclink" id="see-all-popular" onclick="toggleHomeSection('popular')">See all →</span>
             </div>
             <div class="ag" id="popular-grid"></div>
         </div>
 
-        <!-- Top rated list -->
+        <!-- Most Favorite -->
         <div class="sec" style="padding-top:0">
-            <div class="sechead"><span class="sectitle">🏆 Top Rated</span></div>
+            <div class="sechead">
+                <span class="sectitle">❤️ Most Favorite</span>
+                <span class="seclink" id="see-all-favorite" onclick="toggleHomeSection('favorite')">See all →</span>
+            </div>
+            <div class="ag" id="favorite-grid"></div>
+        </div>
+
+        <!-- Top Airing -->
+        <div class="sec" style="padding-top:0">
+            <div class="sechead">
+                <span class="sectitle">🎬 Top Airing</span>
+                <span class="seclink" id="see-all-airing" onclick="toggleHomeSection('airing')">See all →</span>
+            </div>
+            <div class="ag" id="airing-grid"></div>
+        </div>
+
+        <!-- Top ranked list -->
+        <div class="sec" style="padding-top:0">
+            <div class="sechead"><span class="sectitle">🏆 Top Ranked</span></div>
             <div class="toplist" id="top-list"></div>
         </div>
     </div>
@@ -246,29 +323,221 @@
     <!-- ── DISCOVER PAGE ── -->
     <div class="page" id="pg-discover">
         <div class="sec">
-            <h1 style="font-size:28px;font-weight:900;margin-bottom:22px">Discover Anime</h1>
+            <h1 style="font-size:28px;font-weight:900;margin-bottom:22px" id="disc-page-title">Discover Anime</h1>
             <div class="disc-filters">
-                <input type="text" class="disc-search" id="disc-search" placeholder="🔍 Search anime..." oninput="filterDiscover()">
-                <select class="fsel finput" id="disc-genre" onchange="filterDiscover()">
-                    <option value="All">All Genres</option>
-                    <option>Action</option><option>Adventure</option><option>Comedy</option>
-                    <option>Drama</option><option>Fantasy</option><option>Horror</option>
-                    <option>Mecha</option><option>Mystery</option><option>Psychological</option>
-                    <option>Romance</option><option>Sci-Fi</option><option>Slice of Life</option>
-                    <option>Sports</option><option>Supernatural</option><option>Thriller</option>
-                </select>
-                <select class="fsel finput" id="disc-status" onchange="filterDiscover()">
-                    <option value="All">All Status</option>
-                    <option>Ongoing</option><option>Completed</option><option>Upcoming</option>
-                </select>
-                <select class="fsel finput" id="disc-sort" onchange="filterDiscover()">
-                    <option value="rating">Sort: Rating</option>
-                    <option value="year">Sort: Year</option>
-                    <option value="title">Sort: Title</option>
-                </select>
+                <!-- Combined Search & Filters -->
+                <div class="search-container">
+                    <div class="search-bar-wrap">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="disc-search-new" id="disc-search" placeholder="Search anime..." oninput="filterDiscover()" onfocus="showTrendingSearches()" onblur="hideTrendingSearchesSoon()">
+                        <div class="search-filter-wrap">
+                            <button class="search-filter-btn" id="tinder-toggle-btn" onclick="toggleTinderDeck()" title="Daily Anime Tinder Deck" style="background:linear-gradient(135deg,#ff5e62,#ff9966);color:#fff;border:none;margin-right:6px;padding:6px 12px;border-radius:14px;font-weight:800;cursor:pointer">
+                                🔥 Daily Deck
+                            </button>
+                            <span class="genre-divider"></span>
+                            <button class="search-filter-btn" id="filter-toggle-btn" onclick="toggleFilterPanel(event)" title="Toggle Filters">
+                                🎛️ Filter
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Trending Searches Dropdown Overlay -->
+                    <div class="trending-searches-box hidden" id="trending-searches">
+                        <div class="ts-title">🔥 Trending Searches</div>
+                        <div class="ts-tags">
+                            <span class="ts-tag" onclick="selectTrendingSearch('Attack on Titan')">Attack on Titan</span>
+                            <span class="ts-tag" onclick="selectTrendingSearch('One Piece')">One Piece</span>
+                            <span class="ts-tag" onclick="selectTrendingSearch('Demon Slayer')">Demon Slayer</span>
+                            <span class="ts-tag" onclick="selectTrendingSearch('Jujutsu Kaisen')">Jujutsu Kaisen</span>
+                            <span class="ts-tag" onclick="selectTrendingSearch('Death Note')">Death Note</span>
+                            <span class="ts-tag" onclick="selectTrendingSearch('Chainsaw Man')">Chainsaw Man</span>
+                        </div>
+                    </div>
+
+                    <!-- Filters Dropdown Overlay -->
+                    <div class="filter-dropdown-box hidden" id="filter-dropdown" onclick="event.stopPropagation()">
+                        <div class="filter-row">
+                            <select class="filter-select" id="disc-genre" onchange="filterDiscover()">
+                                <option value="All">All Genres</option>
+                                <option>Action</option><option>Adventure</option><option>Comedy</option>
+                                <option>Drama</option><option>Fantasy</option><option>Horror</option>
+                                <option>Mecha</option><option>Mystery</option><option>Psychological</option>
+                                <option>Romance</option><option>Sci-Fi</option><option>Slice of Life</option>
+                                <option>Sports</option><option>Supernatural</option><option>Thriller</option>
+                            </select>
+                        </div>
+                        <div class="filter-row">
+                            <select class="filter-select" id="disc-min-rating" onchange="filterDiscover()">
+                                <option value="0">All Ratings</option>
+                                <option value="9">9.0+ ★ Superb</option>
+                                <option value="8">8.0+ ★ Great</option>
+                                <option value="7">7.0+ ★ Good</option>
+                                <option value="6">6.0+ ★ Okay</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- Daily Tinder Swipe Deck Container -->
+            <div class="tinder-deck-overlay hidden" id="tinder-deck-overlay">
+                <div class="tinder-deck-wrapper">
+                    <div class="td-header">
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span style="font-size:22px" id="td-icon">🔥</span>
+                            <div>
+                                <h2 style="font-size:16px;font-weight:900;color:var(--txt1)" id="td-title">Hourly Anime Swipe Deck</h2>
+                                <p style="font-size:11px;color:var(--txt2)" id="td-counter">0 of 10 Reviewed</p>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <div style="font-size:11px;font-weight:800;color:var(--orange);background:rgba(249,115,22,0.12);padding:5px 10px;border-radius:12px;border:1px solid rgba(249,115,22,0.3)" id="td-timer">
+                                🕒 Next Deck in 60:00
+                            </div>
+                            <button class="td-close-btn" onclick="resetDailyTinderDeck()" title="Refresh swipe deck with 10 new picks">
+                                🔄 Reset
+                            </button>
+                            <button class="td-close-btn" onclick="toggleTinderDeck(false)" title="Minimize Deck (Back)">
+                                ⬅️ Back
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="tinder-card-container" style="position:relative;width:100%;height:380px;margin-top:14px"></div>
+
+                    <div class="td-actions" style="display:flex;justify-content:center;gap:14px;margin-top:16px">
+                        <button class="btn btn-d" onclick="swipeTinderCard('reject')" style="border-radius:50%;width:50px;height:50px;padding:0;justify-content:center;font-size:20px" title="Pass / Reject">✕</button>
+                        <button class="btn btn-g" id="td-redo-btn" onclick="redoLastReject()" style="border-radius:50%;width:44px;height:44px;padding:0;justify-content:center;font-size:16px" title="Undo Last Reject">🔂</button>
+                        <button class="btn btn-s" onclick="swipeTinderCard('accept')" style="border-radius:50%;width:50px;height:50px;padding:0;justify-content:center;font-size:20px" title="Add to Watchlist / Library">❤️</button>
+                    </div>
+                </div>
+            </div>
+
             <p class="rcount" id="disc-count"></p>
             <div class="ag" id="disc-grid"></div>
+        </div>
+    </div>
+
+    <!-- ── WATCHLIST PAGE ── -->
+    <div class="page" id="pg-watchlist">
+        <div class="sec">
+            <h1 style="font-size:28px;font-weight:900;margin-bottom:6px" id="wl-page-title">📚 My Watchlist</h1>
+            <p style="font-size:13px;color:var(--txt3);margin-bottom:20px" id="wl-page-count">0 tracked</p>
+
+            <div class="tabs" style="margin-bottom:20px">
+                <span class="tbtn on" onclick="filterWl('all',this)">All</span>
+                <span class="tbtn" onclick="filterWl('watching',this)">📺 Watching</span>
+                <span class="tbtn" onclick="filterWl('completed',this)">✅ Completed</span>
+                <span class="tbtn" onclick="filterWl('plan_to_watch',this)">⏰ Plan to Watch</span>
+                <span class="tbtn" onclick="filterWl('dropped',this)">❌ Dropped</span>
+            </div>
+
+            <div class="ag" id="wl-grid"></div>
+
+            <div class="empty-st hidden" id="wl-empty">
+                <div class="ei">📚</div>
+                <p style="font-size:16px;font-weight:700">Your list is empty</p>
+                <p style="font-size:13px;color:var(--txt3)">Start adding items to track your journey!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── COMMUNITY PAGE ── -->
+    <div class="page" id="pg-community">
+        <div class="comm-layout">
+            <aside class="comm-sidebar">
+                <div class="slbl">Channels</div>
+                <div class="sitem on" onclick="switchRoom('general',this)">💬 # general</div>
+                <div class="sitem" onclick="switchRoom('spoilers',this)">⚠️ # spoilers</div>
+                <div class="sitem" onclick="switchRoom('recommendations',this)">🎯 # recs</div>
+
+                <div class="slbl" style="margin-top:12px">Online Users</div>
+                <div id="online-list"></div>
+            </aside>
+
+            <main class="comm-main">
+                <div class="comm-head" style="padding:14px 18px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                        <h3 id="room-title" style="font-size:16px;font-weight:800"># general-anime</h3>
+                        <p id="room-sub" style="font-size:12px;color:var(--txt3)">Discuss anything anime!</p>
+                    </div>
+                    <span style="font-size:12px;color:var(--txt3)" id="room-online">0 online</span>
+                </div>
+
+                <div class="chat-msgs" id="comm-msgs" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px"></div>
+
+                <div style="padding:12px 16px;border-top:1px solid var(--bdr);display:flex;flex-direction:column;gap:8px">
+                    <div class="comm-emobar" id="comm-emobar" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px">
+                        <span class="emobtn" style="cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,0.05)" onclick="insertEmoji('comm-inp','🔥')">🔥</span>
+                        <span class="emobtn" style="cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,0.05)" onclick="insertEmoji('comm-inp','💯')">💯</span>
+                        <span class="emobtn" style="cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,0.05)" onclick="insertEmoji('comm-inp','❤️')">❤️</span>
+                        <span class="emobtn" style="cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,0.05)" onclick="insertEmoji('comm-inp','😂')">😂</span>
+                        <span class="emobtn" style="cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,0.05)" onclick="insertEmoji('comm-inp','😭')">😭</span>
+                        <span class="emobtn" style="cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,0.05)" onclick="insertEmoji('comm-inp','✨')">✨</span>
+                        <span class="emobtn" style="cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,0.05)" onclick="insertEmoji('comm-inp','🤯')">🤯</span>
+                    </div>
+                    <div style="display:flex;gap:10px">
+                        <input type="text" class="cinput" id="comm-inp" placeholder="Type a message..." style="flex:1" onkeydown="if(event.key==='Enter') sendCommMsg()">
+                        <button class="btn btn-p" onclick="sendCommMsg()">Send</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- ── FRIENDS PAGE ── -->
+    <div class="page" id="pg-friends">
+        <div class="sec">
+            <div style="margin-bottom:22px">
+                <h1 style="font-size:28px;font-weight:900;margin-bottom:4px">Friends</h1>
+                <p style="font-size:13px;color:var(--txt3)">Connect with fellow anime and gaming fans</p>
+            </div>
+
+            <!-- incoming requests -->
+            <div id="fr-requests-section" class="hidden" style="margin-bottom:20px">
+                <h3 style="font-size:15px;font-weight:700;color:#fb923c;margin-bottom:11px">📨 Friend Requests</h3>
+                <div id="fr-requests-list"></div>
+            </div>
+
+            <!-- stats -->
+            <div class="stat3">
+                <div class="s3box"><div class="s3val" id="fr-count" style="color:var(--orange)">0</div><div class="s3lbl">Friends</div></div>
+                <div class="s3box"><div class="s3val" id="fr-pending-count" style="color:#fbbf24">0</div><div class="s3lbl">Pending</div></div>
+                <div class="s3box"><div class="s3val" id="fr-requests-count" style="color:#f87171">0</div><div class="s3lbl">Requests</div></div>
+            </div>
+
+            <!-- filters -->
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+                <div class="tabs" style="flex:none">
+                    <span class="tbtn on" onclick="filterFriends('all',this)">All</span>
+                    <span class="tbtn" onclick="filterFriends('friends',this)">Friends</span>
+                    <span class="tbtn" onclick="filterFriends('discover',this)">Discover</span>
+                </div>
+                <input type="text" class="disc-search" id="fr-search" placeholder="🔍 Search users..." oninput="filterFriends(currentFrTab)">
+            </div>
+
+            <div class="fr-grid" id="fr-grid"></div>
+            <div class="empty-st hidden" id="fr-empty">
+                <div class="ei">👥</div>
+                <p>No users found</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── HELP PAGE ── -->
+    <div class="page" id="pg-help">
+        <div class="sec" style="max-width:800px">
+            <h1 style="font-size:28px;font-weight:900;margin-bottom:16px">❓ Help & Support</h1>
+            <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r2);padding:20px">
+                <div style="height:350px;overflow-y:auto;margin-bottom:14px" id="my-help-chat-messages"></div>
+                <div class="fgroup">
+                    <input type="text" class="finput" id="hf-title-pg" placeholder="Subject / Title">
+                </div>
+                <div class="fgroup">
+                    <textarea class="finput" id="hf-details-pg" rows="3" placeholder="Describe your request..."></textarea>
+                </div>
+                <button class="btn btn-p btn-full" onclick="submitHelpPageForm()">🔥 Submit Request</button>
+            </div>
         </div>
     </div>
 
@@ -368,118 +637,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ── WATCHLIST PAGE ── -->
-    <div class="page" id="pg-watchlist">
-        <div class="sec">
-            <div style="margin-bottom:22px">
-                <h1 style="font-size:28px;font-weight:900;margin-bottom:4px">My Watchlist</h1>
-                <p style="font-size:13px;color:var(--txt3)" id="wl-page-count">0 anime tracked</p>
-            </div>
-            <div class="tabs" style="margin-bottom:22px">
-                <span class="tbtn on" onclick="filterWl('all',this)">All</span>
-                <span class="tbtn" onclick="filterWl('watching',this)">📺 Watching</span>
-                <span class="tbtn" onclick="filterWl('completed',this)">✅ Completed</span>
-                <span class="tbtn" onclick="filterWl('plan_to_watch',this)">⏰ Plan to Watch</span>
-                <span class="tbtn" onclick="filterWl('dropped',this)">❌ Dropped</span>
-            </div>
-            <div class="wl-grid" id="wl-grid"></div>
-            <div class="empty-st hidden" id="wl-empty">
-                <div class="ei">📚</div>
-                <p style="font-size:16px;font-weight:700;color:var(--txt);margin-bottom:6px">Nothing here yet</p>
-                <p>Start adding anime to track your journey!</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- ── COMMUNITY PAGE ── -->
-    <div class="page" id="pg-community">
-        <div class="comm-layout">
-            <!-- sidebar -->
-            <aside class="comm-sidebar">
-                <div class="slbl">Channels</div>
-                <div class="sitem on" onclick="switchRoom('general',this)">💬 # general</div>
-                <div class="sitem" onclick="switchRoom('spoilers',this)">⚠️ # spoilers</div>
-                <div class="sitem" onclick="switchRoom('recommendations',this)">🎯 # recs</div>
-
-                <div class="slbl" style="margin-top:12px">Online</div>
-                <div id="online-list"></div>
-            </aside>
-
-            <!-- main chat -->
-            <div class="comm-main">
-                <div class="comm-head">
-                    <div style="display:flex;align-items:center;gap:11px">
-                        <div class="chat-ico">💬</div>
-                        <div>
-                            <div style="font-size:13px;font-weight:700" id="room-title"># general</div>
-                            <div style="font-size:11px;color:var(--txt3)" id="room-sub">Discuss anything anime!</div>
-                        </div>
-                    </div>
-                    <span style="font-size:12px;color:var(--txt3)" id="room-online">0 online</span>
-                </div>
-
-                <div class="chat-msgs" id="comm-msgs" style="flex:1;overflow-y:auto;padding:16px"></div>
-
-                <div class="emobar hidden" id="comm-emobar">
-                    <span class="emobtn" onclick="insertEmoji('comm-inp','🔥')">🔥</span>
-                    <span class="emobtn" onclick="insertEmoji('comm-inp','💯')">💯</span>
-                    <span class="emobtn" onclick="insertEmoji('comm-inp','❤️')">❤️</span>
-                    <span class="emobtn" onclick="insertEmoji('comm-inp','😂')">😂</span>
-                    <span class="emobtn" onclick="insertEmoji('comm-inp','😭')">😭</span>
-                    <span class="emobtn" onclick="insertEmoji('comm-inp','👑')">👑</span>
-                    <span class="emobtn" onclick="insertEmoji('comm-inp','✨')">✨</span>
-                    <span class="emobtn" onclick="insertEmoji('comm-inp','🤯')">🤯</span>
-                    <span class="emobtn" onclick="insertEmoji('comm-inp','🎌')">🎌</span>
-                    <span class="emobtn" onclick="insertEmoji('comm-inp','⚡')">⚡</span>
-                </div>
-                <div class="chat-inp-row" style="border-top:1px solid var(--bdr)">
-                    <span class="emotog" onclick="toggleEmobar('comm-emobar',this)">😊</span>
-                    <input class="cinput" id="comm-inp" placeholder="Message the room..." onkeydown="if(event.key==='Enter')sendCommMsg()">
-                    <button class="csend" onclick="sendCommMsg()">→</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ── FRIENDS PAGE ── -->
-    <div class="page" id="pg-friends">
-        <div class="sec">
-            <div style="margin-bottom:22px">
-                <h1 style="font-size:28px;font-weight:900;margin-bottom:4px">Friends</h1>
-                <p style="font-size:13px;color:var(--txt3)">Connect with fellow anime fans</p>
-            </div>
-
-            <!-- incoming requests -->
-            <div id="fr-requests-section" class="hidden" style="margin-bottom:20px">
-                <h3 style="font-size:15px;font-weight:700;color:#fb923c;margin-bottom:11px">📨 Friend Requests</h3>
-                <div id="fr-requests-list"></div>
-            </div>
-
-            <!-- stats -->
-            <div class="stat3">
-                <div class="s3box"><div class="s3val" id="fr-count" style="color:var(--orange)">0</div><div class="s3lbl">Friends</div></div>
-                <div class="s3box"><div class="s3val" id="fr-pending-count" style="color:#fbbf24">0</div><div class="s3lbl">Pending</div></div>
-                <div class="s3box"><div class="s3val" id="fr-requests-count" style="color:#f87171">0</div><div class="s3lbl">Requests</div></div>
-            </div>
-
-            <!-- filters -->
-            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px">
-                <div class="tabs" style="flex:none">
-                    <span class="tbtn on" onclick="filterFriends('all',this)">All</span>
-                    <span class="tbtn" onclick="filterFriends('friends',this)">Friends</span>
-                    <span class="tbtn" onclick="filterFriends('discover',this)">Discover</span>
-                </div>
-                <input type="text" class="disc-search" id="fr-search" placeholder="🔍 Search users..." oninput="filterFriends(currentFrTab)">
-            </div>
-
-            <div class="fr-grid" id="fr-grid"></div>
-            <div class="empty-st hidden" id="fr-empty">
-                <div class="ei">👥</div>
-                <p>No users found</p>
             </div>
         </div>
     </div>
@@ -725,6 +882,182 @@
                 <button class="btn btn-g" style="flex:1" onclick="closeDelModal()">Cancel</button>
                 <button class="btn btn-d" style="flex:1" id="del-confirm-btn">Delete</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     TOAST CONTAINER & EXTRA MODALS
+════════════════════════════════════════ -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- Profile Modal (Settings & Analytics) -->
+<div class="modal-bg" id="profile-modal">
+    <div class="modal-box" style="max-width:540px">
+        <div class="modal-head">
+            <div style="display:flex;gap:12px;align-items:center">
+                <span class="ftab on" id="ptab-btn-settings" onclick="switchProfTab('settings')">⚙️ Profile Settings</span>
+                <span class="ftab" id="ptab-btn-analytics" onclick="switchProfTab('analytics')">📊 Watch Stats</span>
+            </div>
+            <span class="modal-close-btn" onclick="closeProfileModal()">✕</span>
+        </div>
+        <div class="modal-body">
+            <!-- Settings Tab -->
+            <div id="ptab-settings">
+                <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:12px;background:rgba(255,255,255,0.02);border:1px solid var(--bdr);border-radius:var(--r)">
+                    <div style="position:relative">
+                        <img id="prof-avt-preview" src="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--orange)" alt="">
+                        <label style="position:absolute;bottom:0;right:0;background:var(--orange);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer" title="Change Avatar">
+                            ✏️
+                            <input type="file" accept="image/*" style="display:none" onchange="handleCustomAvatarUpload(event)">
+                        </label>
+                    </div>
+                    <div>
+                        <div style="font-weight:700;font-size:14px">Account Email</div>
+                        <div id="prof-email-val" style="font-size:13px;color:var(--txt3)">—</div>
+                    </div>
+                </div>
+
+                <div class="fgroup">
+                    <label class="flabel">Username</label>
+                    <input type="text" class="finput" id="prof-username-inp" placeholder="Username">
+                </div>
+                <div class="fgroup">
+                    <label class="flabel">Bio</label>
+                    <textarea class="finput" id="prof-bio-inp" rows="3" placeholder="Tell us about yourself..."></textarea>
+                </div>
+            </div>
+
+            <!-- Analytics Tab inside Profile Modal -->
+            <div id="ptab-analytics" class="hidden">
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-g" style="flex:1" onclick="closeProfileModal()">Cancel</button>
+            <button class="btn btn-p" style="flex:1" id="prof-save-btn" onclick="saveProfile()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<!-- Cropper Modal -->
+<div class="modal-bg" id="cropper-modal">
+    <div class="modal-box" style="max-width:400px;text-align:center">
+        <div class="modal-head">
+            <h3>✂️ Adjust Avatar</h3>
+            <span class="modal-close-btn" onclick="closeCropperModal()">✕</span>
+        </div>
+        <div class="modal-body" style="display:flex;flex-direction:column;align-items:center">
+            <canvas id="crop-canvas" width="260" height="260" style="border-radius:50%;border:2px solid var(--orange);cursor:grab;background:#000"></canvas>
+            <div style="margin-top:16px;width:100%">
+                <label class="flabel">Zoom</label>
+                <input type="range" id="crop-zoom-range" min="1" max="3" step="0.05" value="1" style="width:100%" oninput="updateCropZoom(this.value)">
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-g" style="flex:1" onclick="closeCropperModal()">Cancel</button>
+            <button class="btn btn-p" style="flex:1" onclick="applyCrop()">Apply</button>
+        </div>
+    </div>
+</div>
+
+<!-- Standalone Analytics Modal -->
+<div class="modal-bg" id="analytics-modal">
+    <div class="modal-box" style="max-width:600px">
+        <div class="modal-head">
+            <h3>📊 Watch Analytics & Progress</h3>
+            <span class="modal-close-btn" onclick="closeAnalyticsModal()">✕</span>
+        </div>
+        <div class="modal-body">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
+                <div class="stat-card" style="background:rgba(255,255,255,0.03);padding:12px;border-radius:8px;text-align:center">
+                    <div style="font-size:11px;color:var(--txt3)">Current Streak</div>
+                    <div id="an-current-streak" style="font-weight:700;font-size:16px;color:var(--orange)">0 Days</div>
+                </div>
+                <div class="stat-card" style="background:rgba(255,255,255,0.03);padding:12px;border-radius:8px;text-align:center">
+                    <div style="font-size:11px;color:var(--txt3)">Best Streak</div>
+                    <div id="an-longest-streak" style="font-weight:700;font-size:16px;color:#22c55e">0 Days</div>
+                </div>
+                <div class="stat-card" style="background:rgba(255,255,255,0.03);padding:12px;border-radius:8px;text-align:center">
+                    <div style="font-size:11px;color:var(--txt3)">This Month</div>
+                    <div id="an-this-month" style="font-weight:700;font-size:16px;color:#3b82f6">0.0 hrs</div>
+                </div>
+                <div class="stat-card" style="background:rgba(255,255,255,0.03);padding:12px;border-radius:8px;text-align:center">
+                    <div style="font-size:11px;color:var(--txt3)">Completion</div>
+                    <div id="an-comp-rate" style="font-weight:700;font-size:16px;color:#a855f7">0%</div>
+                </div>
+            </div>
+
+            <!-- Status Distribution Bar -->
+            <div style="margin-bottom:20px">
+                <div style="font-size:12px;font-weight:600;margin-bottom:8px">Status Breakdown</div>
+                <div style="height:10px;background:rgba(255,255,255,0.08);border-radius:5px;display:flex;overflow:hidden">
+                    <div id="an-bar-completed" style="background:#22c55e;width:0%"></div>
+                    <div id="an-bar-watching" style="background:#3b82f6;width:0%"></div>
+                    <div id="an-bar-plan" style="background:#fbbf24;width:0%"></div>
+                    <div id="an-bar-dropped" style="background:#ef4444;width:0%"></div>
+                </div>
+                <div style="display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--txt3)">
+                    <span>🟢 Completed: <strong id="an-cnt-completed" style="color:var(--txt)">0</strong></span>
+                    <span>🔵 Watching: <strong id="an-cnt-watching" style="color:var(--txt)">0</strong></span>
+                    <span>🟡 Plan: <strong id="an-cnt-plan" style="color:var(--txt)">0</strong></span>
+                    <span>🔴 Dropped: <strong id="an-cnt-dropped" style="color:var(--txt)">0</strong></span>
+                </div>
+            </div>
+
+            <div>
+                <div style="font-size:12px;font-weight:600;margin-bottom:8px">Top Genres</div>
+                <div id="an-genres-list"></div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-g" style="flex:1" onclick="closeAnalyticsModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- User Profile Modal (View other users) -->
+<div class="modal-bg" id="user-profile-modal">
+    <div class="modal-box" style="max-width:440px">
+        <div class="modal-head">
+            <h3>👤 User Profile</h3>
+            <span class="modal-close-btn" onclick="closeUserProfileModal()">✕</span>
+        </div>
+        <div class="modal-body" style="text-align:center">
+            <div style="position:relative;display:inline-block;margin-bottom:12px">
+                <img id="uprof-avt" src="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--orange)" alt="">
+                <span id="uprof-status-dot" class="sdot" style="position:absolute;bottom:4px;right:4px;width:14px;height:14px;border-radius:50%;border:2px solid var(--bg)"></span>
+            </div>
+            <h3 id="uprof-username" style="font-size:18px;font-weight:700;margin-bottom:4px">Username</h3>
+            <div id="uprof-status-text" style="font-size:12px;color:var(--txt3);margin-bottom:12px">○ Offline</div>
+            <p id="uprof-bio" style="font-size:13px;color:var(--txt2);margin-bottom:20px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px">No bio provided.</p>
+
+            <div style="display:flex;gap:10px">
+                <button class="btn btn-p" id="uprof-friend-btn" style="flex:1">Add Friend</button>
+                <button class="btn btn-d" id="uprof-block-btn" style="flex:1">Block</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Help & Feedback Chat Modal -->
+<div class="modal-bg" id="help-feedback-modal">
+    <div class="modal-box" style="max-width:500px;display:flex;flex-direction:column;max-height:80vh">
+        <div class="modal-head">
+            <h3>💬 Help & Feedback</h3>
+            <span class="modal-close-btn" onclick="closeHelpFeedbackModal()">✕</span>
+        </div>
+        <div class="modal-body" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px" id="hchat-msgs">
+            <!-- Messages rendered dynamically -->
+        </div>
+        <div class="modal-foot" style="display:flex;gap:8px">
+            <select class="finput" id="hchat-type" style="width:110px;flex-shrink:0">
+                <option value="feedback">Feedback</option>
+                <option value="bug">Bug</option>
+                <option value="question">Question</option>
+                <option value="other">Other</option>
+            </select>
+            <input type="text" class="finput" id="hchat-inp" placeholder="Type a message..." style="flex:1" onkeydown="if(event.key==='Enter') sendHelpFeedbackMsg()">
+            <button class="btn btn-p" onclick="sendHelpFeedbackMsg()">Send</button>
         </div>
     </div>
 </div>

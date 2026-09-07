@@ -11,6 +11,11 @@ const animeSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    malId: {
+        type: Number,
+        unique: true,
+        sparse: true
+    },
     genres: [String],
     rating: {
         type: Number,
@@ -50,8 +55,18 @@ const animeSchema = new mongoose.Schema({
         default: 'TV'
     },
     isTrending: { type: Boolean, default: false },
-    isPopular:  { type: Boolean, default: false }
+    isPopular:  { type: Boolean, default: false },
+    popularityRank: Number,
+    trendingRank: Number
 
 }, { timestamps: true })
+
+// High-concurrency performance indexes
+animeSchema.index({ title: 1, altTitle: 1 })
+animeSchema.index({ isTrending: 1, trendingRank: 1 })
+animeSchema.index({ isPopular: 1, popularityRank: 1 })
+animeSchema.index({ rating: -1 })
+animeSchema.index({ releaseStatus: 1, rating: -1 })
+animeSchema.index({ genres: 1 })
 
 module.exports = mongoose.model('Anime', animeSchema)

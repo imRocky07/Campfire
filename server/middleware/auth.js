@@ -16,7 +16,13 @@ async function requireLogin(req, res, next) {
         const foundUser = await User.findById(decoded.id)
 
         if (!foundUser) return res.status(401).json({ ok: false, msg: 'user not found' })
-        if (foundUser.banned) return res.status(403).json({ ok: false, msg: 'account banned' })
+        if (foundUser.banned || foundUser.warningsCount >= 2) {
+            return res.status(403).json({
+                ok: false,
+                blocked: true,
+                msg: 'Account blocked due to community guideline violations (multiple warnings for profanity).'
+            })
+        }
 
         req.user = foundUser
         next()

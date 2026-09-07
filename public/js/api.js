@@ -39,16 +39,18 @@ const api = {
     delete: (path)        => req('DELETE', path),
 
     // auth
-    login:    (credential, password) => req('POST', '/auth/login',    { credential, password }),
-    register: (username, email, password) => req('POST', '/auth/register', { username, email, password }),
-    getMe:    () => req('GET', '/auth/me'),
-    logout:   () => req('POST', '/auth/logout'),
+    login:         (credential, password) => req('POST', '/auth/login',    { credential, password }),
+    register:      (username, email, password) => req('POST', '/auth/register', { username, email, password }),
+    getMe:         () => req('GET', '/auth/me'),
+    updateProfile: (data) => req('PUT', '/auth/profile', data),
+    logout:        () => req('POST', '/auth/logout'),
 
     // anime
     getAnime:    (params = {}) => {
         const qs = new URLSearchParams(params).toString()
         return req('GET', '/anime' + (qs ? '?' + qs : ''))
     },
+    getRecommendations: (limit = 12) => req('GET', `/anime/recommendations?limit=${limit}`),
     getOneAnime: (id) => req('GET',    `/anime/${id}`),
     createAnime: (data) => req('POST',  '/anime',     data),
     updateAnime: (id, data) => req('PUT', `/anime/${id}`, data),
@@ -66,15 +68,34 @@ const api = {
     sendMessage: (room, body) => req('POST', '/messages', { room, body }),
     deleteMsg:   (id)   => req('DELETE', `/messages/${id}`),
 
-    // friends
+    // friends & user profiles
     getFriends:    () => req('GET',    '/friends'),
     getDiscover:   () => req('GET',    '/friends/discover'),
+    getUserProfile: (userId) => req('GET', `/friends/user/${userId}`),
     sendRequest:   (userId) => req('POST', `/friends/add/${userId}`),
     acceptRequest: (userId) => req('PUT',  `/friends/accept/${userId}`),
     removeFriend:  (userId) => req('DELETE', `/friends/remove/${userId}`),
+    blockUser:     (userId) => req('POST', `/friends/block/${userId}`),
+    unblockUser:   (userId) => req('POST', `/friends/unblock/${userId}`),
 
     // admin
     getStats:   () => req('GET', '/admin/stats'),
     getUsers:   () => req('GET', '/admin/users'),
-    toggleBan:  (id) => req('PUT', `/admin/ban/${id}`)
+    toggleBan:  (id) => req('PUT', `/admin/ban/${id}`),
+
+    // suggestions & help
+    submitSuggestion: (data) => req('POST', '/suggestions', data),
+    getSuggestions:   () => req('GET', '/suggestions'),
+
+    // gaming
+    getGames: (params = {}) => {
+        const qs = new URLSearchParams(params).toString()
+        return req('GET', '/games' + (qs ? '?' + qs : ''))
+    },
+    getGameRecommendations: (limit = 12) => req('GET', `/games/recommendations?limit=${limit}`),
+    getOneGame: (id) => req('GET', `/games/${id}`),
+    getGamelist: () => req('GET', '/gamelist'),
+    addGamelist: (gameId, playStatus) => req('POST', '/gamelist', { gameId, playStatus }),
+    updateGamelist: (gameId, data) => req('PUT', `/gamelist/${gameId}`, data),
+    removeGamelist: (gameId) => req('DELETE', `/gamelist/${gameId}`)
 }
