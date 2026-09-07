@@ -421,10 +421,23 @@
     <!-- ── WATCHLIST PAGE ── -->
     <div class="page" id="pg-watchlist">
         <div class="sec">
-            <h1 style="font-size:28px;font-weight:900;margin-bottom:6px" id="wl-page-title">📚 My Watchlist</h1>
-            <p style="font-size:13px;color:var(--txt3);margin-bottom:20px" id="wl-page-count">0 tracked</p>
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+                <div>
+                    <h1 style="font-size:28px;font-weight:900;margin-bottom:4px" id="wl-page-title">📚 My Watchlist</h1>
+                    <p style="font-size:13px;color:var(--txt3)" id="wl-page-count">0 tracked</p>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <input type="text" class="finput" id="wl-search-inp" placeholder="Search watchlist..." style="width:170px;padding:7px 12px;font-size:12.5px" oninput="filterWlSearch(this.value)">
+                    <select class="finput" id="wl-sort-sel" style="width:140px;padding:7px 10px;font-size:12.5px" onchange="sortWlList(this.value)">
+                        <option value="recent">Recently Added</option>
+                        <option value="rating">Highest Rated</option>
+                        <option value="title">Title (A-Z)</option>
+                        <option value="progress">Progress</option>
+                    </select>
+                </div>
+            </div>
 
-            <div class="tabs" style="margin-bottom:20px">
+            <div class="tabs" style="margin-bottom:20px" id="wl-tabs-container">
                 <span class="tbtn on" onclick="filterWl('all',this)">All</span>
                 <span class="tbtn" onclick="filterWl('watching',this)">📺 Watching</span>
                 <span class="tbtn" onclick="filterWl('completed',this)">✅ Completed</span>
@@ -526,17 +539,95 @@
 
     <!-- ── HELP PAGE ── -->
     <div class="page" id="pg-help">
-        <div class="sec" style="max-width:800px">
-            <h1 style="font-size:28px;font-weight:900;margin-bottom:16px">❓ Help & Support</h1>
-            <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r2);padding:20px">
-                <div style="height:350px;overflow-y:auto;margin-bottom:14px" id="my-help-chat-messages"></div>
-                <div class="fgroup">
-                    <input type="text" class="finput" id="hf-title-pg" placeholder="Subject / Title">
+        <div class="sec" style="max-width:960px">
+            <div style="margin-bottom:24px">
+                <h1 style="font-size:28px;font-weight:900;margin-bottom:6px">❓ Help & Support Center</h1>
+                <p style="font-size:13px;color:var(--txt3)">Get live assistance, report bugs, suggest anime or games, or check the FAQ.</p>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px" class="help-grid-responsive">
+                <!-- Left: Live Support Chat & Request Form -->
+                <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r2);padding:20px;display:flex;flex-direction:column">
+                    <h2 style="font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+                        <span>💬</span> Live Support & Suggestions
+                    </h2>
+                    <div style="height:260px;overflow-y:auto;margin-bottom:14px;padding:12px;background:rgba(0,0,0,0.25);border:1px solid var(--bdr);border-radius:var(--r);display:flex;flex-direction:column;gap:10px" id="my-help-chat-messages"></div>
+                    
+                    <div class="fgroup" style="margin-bottom:10px">
+                        <select class="finput" id="hf-type-pg" style="font-size:12.5px">
+                            <option value="anime_suggestion">🎬 Anime Suggestion</option>
+                            <option value="game_suggestion">🎮 Game Suggestion</option>
+                            <option value="bug">🐛 Bug Report</option>
+                            <option value="feature">✨ Feature Request</option>
+                            <option value="help">❓ Question / Help</option>
+                        </select>
+                    </div>
+                    <div class="fgroup" style="margin-bottom:10px">
+                        <input type="text" class="finput" id="hf-title-pg" placeholder="Subject / Summary" style="font-size:13px">
+                    </div>
+                    <div class="fgroup" style="margin-bottom:14px">
+                        <textarea class="finput" id="hf-details-pg" rows="3" placeholder="Describe your request or feedback in detail..." style="font-size:13px"></textarea>
+                    </div>
+                    <button class="btn btn-p btn-full" onclick="submitHelpPageForm()">🔥 Submit Request</button>
                 </div>
-                <div class="fgroup">
-                    <textarea class="finput" id="hf-details-pg" rows="3" placeholder="Describe your request..."></textarea>
+
+                <!-- Right: FAQ Accordion -->
+                <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r2);padding:20px">
+                    <h2 style="font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+                        <span>💡</span> Frequently Asked Questions
+                    </h2>
+                    <div class="faq-list" style="display:flex;flex-direction:column;gap:10px">
+                        <div class="faq-card open" onclick="toggleFaq(this)">
+                            <div class="faq-q">
+                                <span>🎴 How does the Hourly Swipe Deck work?</span>
+                                <span class="chevron">▼</span>
+                            </div>
+                            <div class="faq-a">
+                                Every hour, Campfire curates 10 fresh anime or gaming recommendations. Swipe right (or click ❤️) to add to your Plan to Watch/Play, or swipe left (✕) to pass. You can also undo passes or reset the deck anytime!
+                            </div>
+                        </div>
+
+                        <div class="faq-card" onclick="toggleFaq(this)">
+                            <div class="faq-q">
+                                <span>🎮 How do I switch to the Gaming Hub?</span>
+                                <span class="chevron">▼</span>
+                            </div>
+                            <div class="faq-a">
+                                Click the "Hubs" dropdown in the navbar and select "🎮 Video Games". You will instantly access 400+ video games, gaming categories, game library tracking, and dedicated gaming chat channels!
+                            </div>
+                        </div>
+
+                        <div class="faq-card" onclick="toggleFaq(this)">
+                            <div class="faq-q">
+                                <span>🖼️ How do I change or crop my avatar?</span>
+                                <span class="chevron">▼</span>
+                            </div>
+                            <div class="faq-a">
+                                Click your avatar in the navbar → "⚙️ Profile Settings". You can select from 25 animal avatar presets or upload a custom image and use the built-in circular avatar cropper with zoom and drag controls.
+                            </div>
+                        </div>
+
+                        <div class="faq-card" onclick="toggleFaq(this)">
+                            <div class="faq-q">
+                                <span>📊 Where can I see my watch stats and streak?</span>
+                                <span class="chevron">▼</span>
+                            </div>
+                            <div class="faq-a">
+                                Click "📊 Dashboard" from your profile dropdown or the "📊 Watch Stats" tab in Profile Settings. You'll see your current streak, hours watched, completion rate, and favorite genres breakdown!
+                            </div>
+                        </div>
+
+                        <div class="faq-card" onclick="toggleFaq(this)">
+                            <div class="faq-q">
+                                <span>👥 How do I add friends and chat?</span>
+                                <span class="chevron">▼</span>
+                            </div>
+                            <div class="faq-a">
+                                Head to the "Friends" tab to discover users, send friend requests, and see who's online. Join the "Community" tab to chat in real-time anime and gaming channels!
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button class="btn btn-p btn-full" onclick="submitHelpPageForm()">🔥 Submit Request</button>
             </div>
         </div>
     </div>
@@ -893,7 +984,7 @@
 
 <!-- Profile Modal (Settings & Analytics) -->
 <div class="modal-bg" id="profile-modal">
-    <div class="modal-box" style="max-width:540px">
+    <div class="modal-box" style="max-width:560px">
         <div class="modal-head">
             <div style="display:flex;gap:12px;align-items:center">
                 <span class="ftab on" id="ptab-btn-settings" onclick="switchProfTab('settings')">⚙️ Profile Settings</span>
@@ -904,21 +995,30 @@
         <div class="modal-body">
             <!-- Settings Tab -->
             <div id="ptab-settings">
-                <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:12px;background:rgba(255,255,255,0.02);border:1px solid var(--bdr);border-radius:var(--r)">
+                <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.02);border:1px solid var(--bdr);border-radius:var(--r)">
                     <div style="position:relative">
                         <img id="prof-avt-preview" src="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--orange)" alt="">
-                        <label style="position:absolute;bottom:0;right:0;background:var(--orange);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer" title="Change Avatar">
+                        <label style="position:absolute;bottom:0;right:0;background:var(--orange);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.4)" title="Upload Custom Avatar">
                             ✏️
                             <input type="file" accept="image/*" style="display:none" onchange="handleCustomAvatarUpload(event)">
                         </label>
                     </div>
-                    <div>
-                        <div style="font-weight:700;font-size:14px">Account Email</div>
-                        <div id="prof-email-val" style="font-size:13px;color:var(--txt3)">—</div>
+                    <div style="flex:1">
+                        <div style="font-weight:700;font-size:14px" id="prof-user-display">Account Profile</div>
+                        <div id="prof-email-val" style="font-size:12.5px;color:var(--txt3);margin-top:2px">—</div>
                     </div>
                 </div>
 
-                <div class="fgroup">
+                <!-- 25 Animal Avatar Presets -->
+                <div style="margin-bottom:16px">
+                    <label class="flabel" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                        <span>🎨 Preset Animal Avatars</span>
+                        <span style="font-size:11px;color:var(--txt3)">25 Cute Picks</span>
+                    </label>
+                    <div id="prof-presets-list" style="display:flex;flex-wrap:wrap;gap:8px;max-height:125px;overflow-y:auto;padding:8px;background:rgba(255,255,255,0.02);border:1px solid var(--bdr);border-radius:var(--r)"></div>
+                </div>
+
+                <div class="fgroup" style="margin-bottom:12px">
                     <label class="flabel">Username</label>
                     <input type="text" class="finput" id="prof-username-inp" placeholder="Username">
                 </div>
@@ -930,6 +1030,46 @@
 
             <!-- Analytics Tab inside Profile Modal -->
             <div id="ptab-analytics" class="hidden">
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">
+                    <div class="stat-card" style="background:rgba(255,255,255,0.03);padding:10px;border-radius:8px;text-align:center">
+                        <div style="font-size:10.5px;color:var(--txt3)">Streak</div>
+                        <div id="pan-current-streak" style="font-weight:700;font-size:15px;color:var(--orange)">0 Days</div>
+                    </div>
+                    <div class="stat-card" style="background:rgba(255,255,255,0.03);padding:10px;border-radius:8px;text-align:center">
+                        <div style="font-size:10.5px;color:var(--txt3)">Best Streak</div>
+                        <div id="pan-longest-streak" style="font-weight:700;font-size:15px;color:#22c55e">0 Days</div>
+                    </div>
+                    <div class="stat-card" style="background:rgba(255,255,255,0.03);padding:10px;border-radius:8px;text-align:center">
+                        <div style="font-size:10.5px;color:var(--txt3)">This Month</div>
+                        <div id="pan-this-month" style="font-weight:700;font-size:15px;color:#3b82f6">0.0 hrs</div>
+                    </div>
+                    <div class="stat-card" style="background:rgba(255,255,255,0.03);padding:10px;border-radius:8px;text-align:center">
+                        <div style="font-size:10.5px;color:var(--txt3)">Completion</div>
+                        <div id="pan-comp-rate" style="font-weight:700;font-size:15px;color:#a855f7">0%</div>
+                    </div>
+                </div>
+
+                <!-- Status Distribution Bar -->
+                <div style="margin-bottom:18px">
+                    <div style="font-size:12px;font-weight:600;margin-bottom:6px">Status Breakdown</div>
+                    <div style="height:10px;background:rgba(255,255,255,0.08);border-radius:5px;display:flex;overflow:hidden">
+                        <div id="pan-bar-completed" style="background:#22c55e;width:0%"></div>
+                        <div id="pan-bar-watching" style="background:#3b82f6;width:0%"></div>
+                        <div id="pan-bar-plan" style="background:#fbbf24;width:0%"></div>
+                        <div id="pan-bar-dropped" style="background:#ef4444;width:0%"></div>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:8px;font-size:11px;color:var(--txt3);flex-wrap:wrap">
+                        <span>🟢 Completed: <strong id="pan-cnt-completed" style="color:var(--txt)">0</strong></span>
+                        <span>🔵 Watching/Playing: <strong id="pan-cnt-watching" style="color:var(--txt)">0</strong></span>
+                        <span>🟡 Plan: <strong id="pan-cnt-plan" style="color:var(--txt)">0</strong></span>
+                        <span>🔴 Dropped: <strong id="pan-cnt-dropped" style="color:var(--txt)">0</strong></span>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:12px;font-weight:600;margin-bottom:6px">Top Genres</div>
+                    <div id="pan-genres-list"></div>
+                </div>
             </div>
         </div>
         <div class="modal-foot">
@@ -948,14 +1088,19 @@
         </div>
         <div class="modal-body" style="display:flex;flex-direction:column;align-items:center">
             <canvas id="crop-canvas" width="260" height="260" style="border-radius:50%;border:2px solid var(--orange);cursor:grab;background:#000"></canvas>
-            <div style="margin-top:16px;width:100%">
-                <label class="flabel">Zoom</label>
-                <input type="range" id="crop-zoom-range" min="1" max="3" step="0.05" value="1" style="width:100%" oninput="updateCropZoom(this.value)">
+            <div style="margin-top:14px;width:100%">
+                <label class="flabel" style="text-align:left">Zoom</label>
+                <input type="range" id="crop-zoom-range" min="0.5" max="3" step="0.05" value="1" style="width:100%" oninput="updateCropZoom(this.value)">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;justify-content:center;width:100%">
+                <button class="btn btn-g btn-sm" onclick="rotateCropImage(-90)">↺ -90°</button>
+                <button class="btn btn-g btn-sm" onclick="rotateCropImage(90)">↻ +90°</button>
+                <button class="btn btn-g btn-sm" onclick="resetCropImage()">Reset</button>
             </div>
         </div>
         <div class="modal-foot">
             <button class="btn btn-g" style="flex:1" onclick="closeCropperModal()">Cancel</button>
-            <button class="btn btn-p" style="flex:1" onclick="applyCrop()">Apply</button>
+            <button class="btn btn-p" style="flex:1" onclick="applyCroppedAvatar()">Apply</button>
         </div>
     </div>
 </div>
