@@ -51,12 +51,64 @@ document.addEventListener('DOMContentLoaded', async () => {
     showLogin()
 })
 
+// Rotating Campfire quotes on sign in page
+const CAMPFIRE_QUOTES = [
+    "Every great journey begins around a campfire.",
+    "A platform to gather people of the same interest in one place. Because your taste matters.",
+    "Share your passion, track your backlog, and discover your next obsession.",
+    "Connect with like-minded fans across anime, gaming, and entertainment."
+]
+let currentQuoteIdx = 0
+let quoteTimer = null
+
+function renderQuoteDots() {
+    const qdots = document.getElementById('qdots')
+    if (!qdots) return
+    qdots.innerHTML = CAMPFIRE_QUOTES.map((_, i) => `
+        <span class="qdot ${i === currentQuoteIdx ? 'active' : ''}" onclick="setQuote(${i})"></span>
+    `).join('')
+}
+
+function setQuote(idx) {
+    currentQuoteIdx = idx
+    const el = document.getElementById('quote-txt')
+    if (el) {
+        el.classList.add('fade')
+        setTimeout(() => {
+            el.textContent = CAMPFIRE_QUOTES[currentQuoteIdx]
+            el.classList.remove('fade')
+        }, 250)
+    }
+    renderQuoteDots()
+    resetQuoteTimer()
+}
+
+function nextQuote() {
+    const nextIdx = (currentQuoteIdx + 1) % CAMPFIRE_QUOTES.length
+    setQuote(nextIdx)
+}
+
+function resetQuoteTimer() {
+    if (quoteTimer) clearInterval(quoteTimer)
+    quoteTimer = setInterval(nextQuote, 4500)
+}
+
+function initQuotes() {
+    const el = document.getElementById('quote-txt')
+    if (el && !el.textContent.trim()) {
+        el.textContent = CAMPFIRE_QUOTES[0]
+    }
+    renderQuoteDots()
+    resetQuoteTimer()
+}
+
 // Auth flow
 function showLogin() {
     document.getElementById('login-pg').classList.remove('hidden')
     document.getElementById('app-wrap').classList.add('hidden')
     document.getElementById('admin-wrap').classList.add('hidden')
     document.getElementById('navbar').classList.add('hidden')
+    initQuotes()
 }
 
 async function showApp() {
