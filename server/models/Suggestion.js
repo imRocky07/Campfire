@@ -8,7 +8,7 @@ const suggestionSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['anime_suggestion', 'feature_request', 'bug_report', 'help_question', 'other'],
+        enum: ['anime_suggestion', 'game_suggestion', 'category_suggestion', 'feature_request', 'bug_report', 'help_question', 'other'],
         default: 'anime_suggestion'
     },
     title: {

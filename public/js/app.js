@@ -161,12 +161,12 @@ function fillDemo(userType) {
     }
     const emailInp = document.getElementById('inp-email')
     const passInp  = document.getElementById('inp-pass')
-    if (userType === 'sakura') {
+    if (userType === 'sakura' || userType === 'user') {
         emailInp.value = 'sakura@campfire.app'
         passInp.value  = 'demo123'
     } else if (userType === 'admin') {
         emailInp.value = 'admin@campfire.app'
-        passInp.value  = 'demo123'
+        passInp.value  = 'admin123'
     }
     setAuthErr('')
     passInp.focus()
@@ -1385,7 +1385,7 @@ async function swipeAnime(action) {
         const itemId = item._id
         if (isGaming) {
             const inList = myGamelist.some(w => String(w.game?._id || w.game || w._id || w) === String(itemId))
-            if (!inList) {
+            if (!inWL) {
                 try {
                     const res = await api.addGamelist(itemId, 'plan_to_play')
                     if (res && res.ok && res.data) {
@@ -1426,14 +1426,6 @@ async function swipeAnime(action) {
     tinderIndex++
     saveTinderState()
     renderTinderCard()
-}
-
-async function swipeTinderCard(action) {
-    if (action === 'accept' || action === 'like') {
-        await swipeAnime('like')
-    } else {
-        await swipeAnime('reject')
-    }
 }
 
 function redoLastReject() {
@@ -1903,21 +1895,9 @@ function renderWlGrid() {
                         <div class="wl-studio">${isGaming ? (item.developer || item.publisher || 'Game') : (item.studio || item.mediaType || 'Anime')}</div>
                         
                         <div class="wl-card-controls">
-                            <!-- Status Selector -->
+                            <!-- Status Badge & Star Rating -->
                             <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
-                                <select class="wl-status-select" onchange="updateWlItemStatus('${item._id}', this.value)">
-                                    ${isGaming ? `
-                                        <option value="playing" ${statusVal === 'playing' ? 'selected' : ''}>🎮 Playing</option>
-                                        <option value="completed" ${statusVal === 'completed' ? 'selected' : ''}>✅ Completed</option>
-                                        <option value="plan_to_play" ${statusVal === 'plan_to_play' ? 'selected' : ''}>⏰ Plan to Play</option>
-                                        <option value="dropped" ${statusVal === 'dropped' ? 'selected' : ''}>❌ Dropped</option>
-                                    ` : `
-                                        <option value="watching" ${statusVal === 'watching' ? 'selected' : ''}>📺 Watching</option>
-                                        <option value="completed" ${statusVal === 'completed' ? 'selected' : ''}>✅ Completed</option>
-                                        <option value="plan_to_watch" ${statusVal === 'plan_to_watch' ? 'selected' : ''}>⏰ Plan to Watch</option>
-                                        <option value="dropped" ${statusVal === 'dropped' ? 'selected' : ''}>❌ Dropped</option>
-                                    `}
-                                </select>
+                                <span class="sbadge ${statusVal}">${wlStatusLabel(statusVal)}</span>
 
                                 <!-- Star Rating -->
                                 <div class="wl-stars" title="Rate 1-5 Stars">
@@ -1943,8 +1923,8 @@ function renderWlGrid() {
 
                             <!-- Action buttons -->
                             <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px">
-                                <button class="btn btn-g btn-sm" style="font-size:11px;padding:3px 8px" onclick="openDetail('${item._id}')">Details</button>
-                                <button class="btn btn-d btn-sm" style="font-size:11px;padding:3px 8px" onclick="quickRemoveWl('${item._id}')">Remove</button>
+                                <button class="btn btn-g btn-sm" style="font-size:10px;padding:2px 7px" onclick="openDetail('${item._id}')">Details</button>
+                                <button class="btn btn-d btn-sm" style="font-size:10px;padding:2px 7px" onclick="quickRemoveWl('${item._id}')">Remove</button>
                             </div>
                         </div>
                     </div>
@@ -2897,50 +2877,64 @@ async function doDeleteMsg(msgId) {
 // Profile & analytics modal
 let activeAvatarDataUrl = ''
 
-const ANIMAL_AVATARS = [
-    { name: 'Bear', file: 'bear.png' },
-    { name: 'Bird', file: 'bird.png' },
-    { name: 'Cat', file: 'cat.png' },
-    { name: 'Cow', file: 'cow.png' },
-    { name: 'Deer', file: 'deer.png' },
-    { name: 'Dog', file: 'dog.png' },
-    { name: 'Duck', file: 'duck.png' },
-    { name: 'Elephant', file: 'elephant.png' },
-    { name: 'Fox', file: 'fox.png' },
-    { name: 'Giraffe', file: 'giraffe.png' },
-    { name: 'Goat', file: 'goat.png' },
-    { name: 'Gorilla', file: 'gorilla.png' },
-    { name: 'Koala', file: 'koala.png' },
-    { name: 'Lion', file: 'lion.png' },
-    { name: 'Monkey', file: 'monkey.png' },
-    { name: 'Panda', file: 'panda.png' },
-    { name: 'Penguin', file: 'penguin.png' },
-    { name: 'Pig', file: 'pig.png' },
-    { name: 'Rabbit', file: 'rabbit.png' },
-    { name: 'Rhino', file: 'rhino.png' },
-    { name: 'Rooster', file: 'rooster.png' },
-    { name: 'Sheep', file: 'sheep.png' },
-    { name: 'Snake', file: 'snake.png' },
-    { name: 'Tiger', file: 'tiger.png' },
-    { name: 'Wolf', file: 'wolf.png' }
+const ROBOT_AVATARS = [
+    { name: 'Mech Fox 🦊', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=kitsuneFox' },
+    { name: 'Robo Mouse 🐭', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=speedyMouse' },
+    { name: 'Cyber Lion 🦁', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=kingLion' },
+    { name: 'Iron Wolf 🐺', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=alphaWolf' },
+    { name: 'Steel Bear 🐻', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=grizzlyBear' },
+    { name: 'Mecha Panda 🐼', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=bambooPanda' },
+    { name: 'Fire Dragon 🐉', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=fireDragon' },
+    { name: 'Cyber Owl 🦉', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=wiseOwl' },
+    { name: 'Shadow Cat 🐱', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=shadowCat' },
+    { name: 'Nano Rabbit 🐰', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=snowRabbit' },
+    { name: 'Robo Titan 🤖', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=RoboTitan' },
+    { name: 'Volt Bot ⚡', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=VoltBot' }
+]
+
+const HUMAN_AVATARS = [
+    { name: 'Sakura 🌸', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=SakuraMoon' },
+    { name: 'Ninja 🥷', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ShadowNinja' },
+    { name: 'Cyber 🤖', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=CyberOtaku' },
+    { name: 'Flame 🔥', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=FlameDemon' },
+    { name: 'Vanguard 🌟', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=StarVanguard' },
+    { name: 'Alex 👨', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=AlexHero' },
+    { name: 'Luna 👩', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=LunaStar' },
+    { name: 'Kai 🧑', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=KaiGamer' },
+    { name: 'Rin 👧', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=RinManga' },
+    { name: 'Kenji 👦', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=KenjiSensei' }
 ]
 
 function renderAvatarPresets() {
-    const container = document.getElementById('prof-presets-list')
-    if (!container) return
-    const curAvatar = activeAvatarDataUrl || (currentUser?.avatar || '')
+    const robotContainer = document.getElementById('prof-robot-presets-list')
+    if (robotContainer) {
+        robotContainer.innerHTML = ROBOT_AVATARS.map(avt => {
+            const isSelected = activeAvatarDataUrl === avt.url
+            return `
+                <div class="prof-preset-item ${isSelected ? 'selected' : ''}" 
+                     onclick="selectAvatarPreset('${avt.url}')"
+                     title="${avt.name}"
+                     style="cursor:pointer;border-radius:50%;padding:2px;border:2px solid ${isSelected ? 'var(--orange)' : 'transparent'};transition:all 0.15s">
+                    <img src="${avt.url}" alt="${avt.name}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;display:block;background:var(--bg2)">
+                </div>
+            `
+        }).join('')
+    }
 
-    container.innerHTML = ANIMAL_AVATARS.map(av => {
-        const url = `/img/avatars/${av.file}`
-        const isActive = curAvatar === url
-        return `
-            <div class="avatar-preset-item ${isActive ? 'active-preset' : ''}" 
-                 onclick="selectAvatarPreset('${url}')" 
-                 title="${av.name}">
-                <img src="${url}" alt="${av.name}" onerror="this.src='/img/avatars/cat.png'">
-            </div>
-        `
-    }).join('')
+    const humanContainer = document.getElementById('prof-human-presets-list')
+    if (humanContainer) {
+        humanContainer.innerHTML = HUMAN_AVATARS.map(avt => {
+            const isSelected = activeAvatarDataUrl === avt.url
+            return `
+                <div class="prof-preset-item ${isSelected ? 'selected' : ''}" 
+                     onclick="selectAvatarPreset('${avt.url}')"
+                     title="${avt.name}"
+                     style="cursor:pointer;border-radius:50%;padding:2px;border:2px solid ${isSelected ? 'var(--orange)' : 'transparent'};transition:all 0.15s">
+                    <img src="${avt.url}" alt="${avt.name}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;display:block;background:var(--bg2)">
+                </div>
+            `
+        }).join('')
+    }
 }
 
 function openProfileModal() {
@@ -2948,14 +2942,17 @@ function openProfileModal() {
     const modal = document.getElementById('profile-modal')
     if (!modal) return
 
-    const emailEl = document.getElementById('prof-email-val')
-    if (emailEl) emailEl.textContent = currentUser.email || '—'
+    const userDisplay = document.getElementById('prof-user-display')
+    if (userDisplay) userDisplay.textContent = currentUser.username || 'Account Profile'
 
-    const userDisp = document.getElementById('prof-user-display')
-    if (userDisp) userDisp.textContent = currentUser.username || 'Account Profile'
+    const emailVal = document.getElementById('prof-email-val')
+    if (emailVal) emailVal.textContent = currentUser.email || '—'
 
-    document.getElementById('prof-username-inp').value = currentUser.username || ''
-    document.getElementById('prof-bio-inp').value      = currentUser.bio || ''
+    const userInp = document.getElementById('prof-username-inp')
+    if (userInp) userInp.value = currentUser.username || ''
+
+    const bioInp = document.getElementById('prof-bio-inp')
+    if (bioInp) bioInp.value = currentUser.bio || ''
     
     activeAvatarDataUrl = currentUser.avatar || ''
     updateProfAvtPreview()
@@ -3136,8 +3133,8 @@ function applyCroppedAvatar() {
 
     const preview = document.getElementById('prof-avt-preview')
     if (preview) preview.src = dataUrl
-
     renderAvatarPresets()
+
     closeCropperModal()
     toast('Custom avatar ready! Click Save Changes to apply.', 'ok')
 }
@@ -3155,68 +3152,43 @@ function closeAnalyticsModal() {
     if (modal) modal.classList.remove('open')
 }
 
-function switchProfTab(tab) {
-    const isSettings   = tab === 'settings'
-    const settingsBtn  = document.getElementById('ptab-btn-settings')
-    const analyticsBtn = document.getElementById('ptab-btn-analytics')
-    const settingsSec  = document.getElementById('ptab-settings')
-    const analyticsSec = document.getElementById('ptab-analytics')
-    const saveBtn      = document.getElementById('prof-save-btn')
-
-    if (settingsBtn)  settingsBtn.classList.toggle('on', isSettings)
-    if (analyticsBtn) analyticsBtn.classList.toggle('on', !isSettings)
-    if (settingsSec)  settingsSec.classList.toggle('hidden', !isSettings)
-    if (analyticsSec) analyticsSec.classList.toggle('hidden', isSettings)
-
-    if (saveBtn) {
-        saveBtn.style.display = isSettings ? 'block' : 'none'
-    }
-
-    if (!isSettings) {
-        renderProfileAnalytics()
-    }
-}
-
 function renderProfileAnalytics() {
-    const isGaming = currentHub === 'gaming'
-    const list = isGaming ? (myGamelist || []) : (myWatchlist || [])
-    const statusKey = isGaming ? 'playStatus' : 'watchStatus'
+    const list = myWatchlist || []
 
-    function updateStatEl(id1, id2, value) {
-        const el1 = document.getElementById(id1)
-        const el2 = document.getElementById(id2)
-        if (el1) el1.textContent = value
-        if (el2) el2.textContent = value
+    function setText(id, val) {
+        const el = document.getElementById(id)
+        if (el) el.textContent = val
     }
-
-    function updateWidthEl(id1, id2, widthPct) {
-        const el1 = document.getElementById(id1)
-        const el2 = document.getElementById(id2)
-        if (el1) el1.style.width = widthPct
-        if (el2) el2.style.width = widthPct
+    function setWidth(id, val) {
+        const el = document.getElementById(id)
+        if (el) el.style.width = val
+    }
+    function setHtml(id, val) {
+        const el = document.getElementById(id)
+        if (el) el.innerHTML = val
     }
 
     if (!list.length) {
-        updateStatEl('an-current-streak', 'pan-current-streak', '0 Days')
-        updateStatEl('an-longest-streak', 'pan-longest-streak', '0 Days')
-        updateStatEl('an-this-month', 'pan-this-month', '0.0 hrs')
-        updateStatEl('an-comp-rate', 'pan-comp-rate', '0%')
+        setText('an-current-streak', '0 Days')
+        setText('an-streak-sub', 'Start a streak today!')
+        setText('an-longest-streak', '0 Days')
+        setText('an-total-hours', '0.0 hrs')
+        setText('an-total-days', '~0.0 days')
+        setText('an-monthly-avg', '0.0 hrs/mo')
+        setText('an-this-month', '0.0 hrs')
+        setText('an-comp-rate', '0%')
+        
+        setWidth('an-bar-completed', '0%')
+        setWidth('an-bar-watching', '0%')
+        setWidth('an-bar-plan', '0%')
+        setWidth('an-bar-dropped', '0%')
 
-        updateWidthEl('an-bar-completed', 'pan-bar-completed', '0%')
-        updateWidthEl('an-bar-watching', 'pan-bar-watching', '0%')
-        updateWidthEl('an-bar-plan', 'pan-bar-plan', '0%')
-        updateWidthEl('an-bar-dropped', 'pan-bar-dropped', '0%')
+        setText('an-cnt-completed', '0')
+        setText('an-cnt-watching', '0')
+        setText('an-cnt-plan', '0')
+        setText('an-cnt-dropped', '0')
 
-        updateStatEl('an-cnt-completed', 'pan-cnt-completed', '0')
-        updateStatEl('an-cnt-watching', 'pan-cnt-watching', '0')
-        updateStatEl('an-cnt-plan', 'pan-cnt-plan', '0')
-        updateStatEl('an-cnt-dropped', 'pan-cnt-dropped', '0')
-
-        const emptyHtml = `<div style="font-size:12px;color:var(--txt3);text-align:center;padding:12px">No ${isGaming ? 'gaming' : 'watchlist'} entries recorded yet.</div>`
-        const gList1 = document.getElementById('an-genres-list')
-        const gList2 = document.getElementById('pan-genres-list')
-        if (gList1) gList1.innerHTML = emptyHtml
-        if (gList2) gList2.innerHTML = emptyHtml
+        setHtml('an-genres-list', '<div style="font-size:12px;color:var(--txt3);text-align:center;padding:12px">No watchlist entries recorded yet.</div>')
         return
     }
 
@@ -3226,28 +3198,22 @@ function renderProfileAnalytics() {
     const currentYear = now.getFullYear()
     const currentMonth = now.getMonth()
 
-    const statusCounts = { completed: 0, watching: 0, playing: 0, plan_to_watch: 0, plan_to_play: 0, dropped: 0 }
+    const statusCounts = { completed: 0, watching: 0, plan_to_watch: 0, dropped: 0 }
     const genreMap = {}
     const activeDatesSet = new Set()
 
     list.forEach(entry => {
-        const st = entry[statusKey] || (isGaming ? 'plan_to_play' : 'plan_to_watch')
+        const st = entry.watchStatus || 'plan_to_watch'
         statusCounts[st] = (statusCounts[st] || 0) + 1
 
-        const item = isGaming ? (entry.game || {}) : (entry.anime || {})
-        let entryMinutes = 0
-
-        if (isGaming) {
-            entryMinutes = (entry.playtimeHours || (st === 'completed' ? 20 : 5)) * 60
-        } else {
-            const epCount = entry.ep_progress || (st === 'completed' ? (item.episodes || 12) : 0)
-            const durationPerEp = (item.mediaType === 'Movie') ? 120 : 24
-            entryMinutes = epCount * durationPerEp
-        }
+        const anime = entry.anime || {}
+        const epCount = entry.ep_progress || (st === 'completed' ? (anime.episodes || 12) : 0)
+        const durationPerEp = (anime.mediaType === 'Movie') ? 120 : 24
+        const entryMinutes = epCount * durationPerEp
         totalMinutes += entryMinutes
 
-        if (entry.updatedAt || entry.createdAt) {
-            const d = new Date(entry.updatedAt || entry.createdAt)
+        if (entry.updatedAt) {
+            const d = new Date(entry.updatedAt)
             const dateStr = d.toISOString().split('T')[0]
             activeDatesSet.add(dateStr)
 
@@ -3256,25 +3222,20 @@ function renderProfileAnalytics() {
             }
         }
 
-        const genres = item.genres || item.platforms || []
+        const genres = anime.genres || []
         genres.forEach(g => {
             genreMap[g] = (genreMap[g] || 0) + 1
         })
     })
 
     const totalTracked = list.length
-    const completedCount = statusCounts.completed || 0
-    const activeCount = isGaming ? (statusCounts.playing || 0) : (statusCounts.watching || 0)
-    const planCount = isGaming ? (statusCounts.plan_to_play || 0) : (statusCounts.plan_to_watch || 0)
-    const droppedCount = statusCounts.dropped || 0
-
-    const compRateVal = totalTracked > 0 ? ((completedCount / totalTracked) * 100).toFixed(1) : 0
+    const compRateVal = totalTracked > 0 ? ((statusCounts.completed / totalTracked) * 100).toFixed(1) : 0
 
     // Stacked progress bar percentages
-    const pctCompleted = totalTracked > 0 ? (completedCount / totalTracked) * 100 : 0
-    const pctActive     = totalTracked > 0 ? (activeCount / totalTracked) * 100 : 0
-    const pctPlan       = totalTracked > 0 ? (planCount / totalTracked) * 100 : 0
-    const pctDropped    = totalTracked > 0 ? (droppedCount / totalTracked) * 100 : 0
+    const pctCompleted = totalTracked > 0 ? (statusCounts.completed / totalTracked) * 100 : 0
+    const pctWatching   = totalTracked > 0 ? (statusCounts.watching / totalTracked) * 100 : 0
+    const pctPlan       = totalTracked > 0 ? (statusCounts.plan_to_watch / totalTracked) * 100 : 0
+    const pctDropped    = totalTracked > 0 ? (statusCounts.dropped / totalTracked) * 100 : 0
 
     // Streaks calculation
     const sortedDates = Array.from(activeDatesSet).sort()
@@ -3312,23 +3273,31 @@ function renderProfileAnalytics() {
         }
     }
 
+    const totalHours = (totalMinutes / 60).toFixed(1)
+    const totalDays = (totalMinutes / 1440).toFixed(1)
     const thisMonthHours = (thisMonthMinutes / 60).toFixed(1)
+    const avgMonths = Math.max(1, now.getMonth() + 1)
+    const monthlyAvgHours = ((totalMinutes / 60) / avgMonths).toFixed(1)
 
-    // Update DOM on both modals
-    updateStatEl('an-current-streak', 'pan-current-streak', `${currentStreak} Days`)
-    updateStatEl('an-longest-streak', 'pan-longest-streak', `${longestStreak} Days`)
-    updateStatEl('an-this-month', 'pan-this-month', `${thisMonthHours} hrs`)
-    updateStatEl('an-comp-rate', 'pan-comp-rate', `${compRateVal}%`)
+    // DOM Updates
+    setText('an-current-streak', `${currentStreak} Days`)
+    setText('an-streak-sub', currentStreak > 0 ? '🔥 Keep watching today!' : 'Start a streak today!')
+    setText('an-longest-streak', `${longestStreak} Days`)
+    setText('an-total-hours', `${totalHours} hrs`)
+    setText('an-total-days', `~${totalDays} days`)
+    setText('an-monthly-avg', `${monthlyAvgHours} hrs/mo`)
+    setText('an-this-month', `${thisMonthHours} hrs`)
+    setText('an-comp-rate', `${compRateVal}%`)
 
-    updateWidthEl('an-bar-completed', 'pan-bar-completed', `${pctCompleted}%`)
-    updateWidthEl('an-bar-watching', 'pan-bar-watching', `${pctActive}%`)
-    updateWidthEl('an-bar-plan', 'pan-bar-plan', `${pctPlan}%`)
-    updateWidthEl('an-bar-dropped', 'pan-bar-dropped', `${pctDropped}%`)
+    setWidth('an-bar-completed', `${pctCompleted}%`)
+    setWidth('an-bar-watching', `${pctWatching}%`)
+    setWidth('an-bar-plan', `${pctPlan}%`)
+    setWidth('an-bar-dropped', `${pctDropped}%`)
 
-    updateStatEl('an-cnt-completed', 'pan-cnt-completed', completedCount)
-    updateStatEl('an-cnt-watching', 'pan-cnt-watching', activeCount)
-    updateStatEl('an-cnt-plan', 'pan-cnt-plan', planCount)
-    updateStatEl('an-cnt-dropped', 'pan-cnt-dropped', droppedCount)
+    setText('an-cnt-completed', statusCounts.completed)
+    setText('an-cnt-watching', statusCounts.watching)
+    setText('an-cnt-plan', statusCounts.plan_to_watch)
+    setText('an-cnt-dropped', statusCounts.dropped)
 
     // Genre Preference Bars
     const topGenres = Object.entries(genreMap)
@@ -3336,22 +3305,24 @@ function renderProfileAnalytics() {
         .sort((a, b) => b.count - a.count)
         .slice(0, 5)
 
-    const genresHtml = topGenres.length > 0 ? topGenres.map(g => `
-        <div class="genre-pref-row" style="margin-bottom:8px">
-            <div class="genre-pref-meta" style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px">
-                <span class="genre-pref-name" style="font-weight:600">${g.name}</span>
-                <span class="genre-pref-pct" style="color:var(--txt3)">${g.count} entries (${g.pct}%)</span>
+    let genreHtml = ''
+    if (topGenres.length > 0) {
+        genreHtml = topGenres.map(g => `
+            <div class="genre-pref-row">
+                <div class="genre-pref-meta">
+                    <span class="genre-pref-name">${g.name}</span>
+                    <span class="genre-pref-pct">${g.count} anime (${g.pct}%)</span>
+                </div>
+                <div class="genre-pref-track">
+                    <div class="genre-pref-fill" style="width:${Math.min(100, Math.max(10, g.pct))}%"></div>
+                </div>
             </div>
-            <div class="genre-pref-track" style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
-                <div class="genre-pref-fill" style="height:100%;background:linear-gradient(90deg,var(--orange),#3b82f6);width:${Math.min(100, Math.max(10, g.pct))}%"></div>
-            </div>
-        </div>
-    `).join('') : '<div style="font-size:12px;color:var(--txt3);text-align:center;padding:12px">No genre data available yet.</div>'
+        `).join('')
+    } else {
+        genreHtml = '<div style="font-size:12px;color:var(--txt3);text-align:center;padding:12px">No genre data available yet.</div>'
+    }
 
-    const gList1 = document.getElementById('an-genres-list')
-    const gList2 = document.getElementById('pan-genres-list')
-    if (gList1) gList1.innerHTML = genresHtml
-    if (gList2) gList2.innerHTML = genresHtml
+    setHtml('an-genres-list', genreHtml)
 }
 
 function updateProfAvtPreview() {
@@ -3562,7 +3533,7 @@ document.addEventListener('click', e => {
     const profModal    = document.getElementById('profile-modal')
     const anModal      = document.getElementById('analytics-modal')
     const cropModal    = document.getElementById('cropper-modal')
-    const hfModal      = document.getElementById('help-feedback-modal')
+    const uProfModal   = document.getElementById('user-profile-modal')
 
     if (e.target === animeModal) closeAnimeModal()
     if (e.target === delModal)   closeDelModal()
@@ -3570,77 +3541,17 @@ document.addEventListener('click', e => {
     if (e.target === anModal)    closeAnalyticsModal()
     if (e.target === cropModal)  closeCropperModal()
     if (e.target === uProfModal) closeUserProfileModal()
-    if (e.target === hfModal)    closeHelpFeedbackModal()
 })
 
-function openHelpFeedbackModal() {
-    const modal = document.getElementById('help-feedback-modal')
-    if (modal) {
-        modal.classList.add('open')
-        loadMyHelpChat()
-    }
-}
-
-function closeHelpFeedbackModal() {
-    const modal = document.getElementById('help-feedback-modal')
-    if (modal) modal.classList.remove('open')
-}
-
-function toggleFaq(cardEl) {
-    if (cardEl) {
-        cardEl.classList.toggle('open')
-    }
-}
-
-async function submitHelpPageForm() {
-    const typeEl = document.getElementById('hf-type-pg')
-    const titleEl = document.getElementById('hf-title-pg')
-    const detailsEl = document.getElementById('hf-details-pg')
-
-    const type = typeEl ? typeEl.value : 'help'
-    const title = (titleEl?.value || '').trim()
-    const details = (detailsEl?.value || '').trim()
-
-    if (!details) {
-        toast('Please enter a description for your request', 'err')
-        return
-    }
-
-    const res = await api.submitSuggestion({
-        type: type,
-        title: title || details.slice(0, 60),
-        details: details
-    })
-
-    if (!res.ok) {
-        if (res.blocked) {
-            toast(res.msg || 'Account Blocked for posting rubbish/bad words', 'err')
-            setTimeout(() => logout(), 2200)
-        } else if (res.warning) {
-            toast(res.msg || '⚠️ Warning: Off-topic/rubbish message removed!', 'err')
-        } else {
-            toast(res.msg || 'Failed to submit request', 'err')
-        }
-        return
-    }
-
-    if (titleEl) titleEl.value = ''
-    if (detailsEl) detailsEl.value = ''
-
-    if (res.isDuplicate || res.botReply) {
-        toast('Already working on it! 🔥', 'ok')
-    } else {
-        toast('Request submitted successfully! 🔥', 'ok')
-    }
-
-    await loadMyHelpChat()
+function toggleFaq(card) {
+    if (!card) return
+    card.classList.toggle('open')
 }
 
 // Help & Feedback Live Chat Assistant - User-Specific History & Moderation
 async function loadMyHelpChat() {
-    const c1 = document.getElementById('hchat-msgs')
-    const c2 = document.getElementById('my-help-chat-messages')
-    if (!c1 && !c2) return
+    const msgsContainer = document.getElementById('hchat-msgs')
+    if (!msgsContainer) return
 
     const res = await api.get('/suggestions/my')
     if (!res.ok) return
@@ -3650,15 +3561,14 @@ async function loadMyHelpChat() {
         <div style="display:flex;gap:10px;align-items:flex-start">
             <div style="width:32px;height:32px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🤖</div>
             <div style="max-width:80%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:14px 14px 14px 2px;padding:12px 16px;font-size:13px;color:var(--txt);line-height:1.5">
-                Welcome to Campfire Live Support & Feedback Chat! 🔥<br>
-                Your suggestions, bug reports, and questions are saved here permanently. Our team reviews every entry!
+                Welcome back to Campfire Live Support & Feedback Chat! 🔥<br>
+                Your suggestions and questions are saved here permanently. Select a category, type your message, and hit Send!
             </div>
         </div>
     `
 
     if (!res.data || res.data.length === 0) {
-        if (c1) c1.innerHTML = welcomeHtml
-        if (c2) c2.innerHTML = welcomeHtml
+        msgsContainer.innerHTML = welcomeHtml
         return
     }
 
@@ -3681,11 +3591,15 @@ async function loadMyHelpChat() {
         } else if (item.type === 'anime_suggestion') {
             replyText = `🎬 <strong>Thank you so much for sending this anime suggestion!</strong><br>We have logged your suggestion ("<em>${escHtml(item.title)}</em>"). Our database team will verify and import it! 🔥`
         } else if (item.type === 'game_suggestion') {
-            replyText = `🎮 <strong>Thank you for suggesting this video game!</strong><br>We have added ("<em>${escHtml(item.title)}</em>") to our gaming library import queue! 🔥`
-        } else if (item.type === 'feature_request' || item.type === 'feature') {
-            replyText = `✨ <strong>Thank you for this feature request!</strong><br>Your idea ("<em>${escHtml(item.title)}</em>") has been recorded and sent directly to our development team.`
-        } else if (item.type === 'bug_report' || item.type === 'bug') {
-            replyText = `🐞 <strong>Thank you for sending this bug report!</strong><br>Our technical team has logged this issue ("<em>${escHtml(item.title)}</em>") and is looking into it.`
+            replyText = `🎮 <strong>Thank you so much for sending this game suggestion!</strong><br>We have logged your suggestion ("<em>${escHtml(item.title)}</em>"). Our gaming database team will verify and import it! 🔥`
+        } else if (item.type === 'category_suggestion') {
+            replyText = `🏷️ <strong>Thank you so much for suggesting a new interest/category!</strong><br>We have logged your category idea ("<em>${escHtml(item.title)}</em>"). Our product team is actively exploring new hubs to expand Campfire! 🔥`
+        } else if (item.type === 'feature_request') {
+            replyText = `✨ <strong>Thank you so much for sending this feature request!</strong><br>Your idea ("<em>${escHtml(item.title)}</em>") has been recorded and sent directly to our development team.`
+        } else if (item.type === 'bug_report') {
+            replyText = `🐞 <strong>Thank you so much for sending this issue report!</strong><br>Our technical team has logged this issue ("<em>${escHtml(item.title)}</em>") and is looking into it.`
+        } else if (item.type === 'help_question') {
+            replyText = `❓ <strong>Thank you for your question!</strong><br>A Campfire support staff member will review your query.`
         }
 
         const bBubble = `
@@ -3700,15 +3614,8 @@ async function loadMyHelpChat() {
         return uBubble + bBubble
     }).join('')
 
-    const fullContent = welcomeHtml + chatItemsHtml
-    if (c1) {
-        c1.innerHTML = fullContent
-        c1.scrollTop = c1.scrollHeight
-    }
-    if (c2) {
-        c2.innerHTML = fullContent
-        c2.scrollTop = c2.scrollHeight
-    }
+    msgsContainer.innerHTML = welcomeHtml + chatItemsHtml
+    msgsContainer.scrollTop = msgsContainer.scrollHeight
 }
 
 async function sendHelpFeedbackMsg() {
@@ -3722,7 +3629,7 @@ async function sendHelpFeedbackMsg() {
     inp.value = ''
 
     const msgsContainer = document.getElementById('hchat-msgs')
-    const pageMsgsContainer = document.getElementById('my-help-chat-messages')
+    if (!msgsContainer) return
 
     const tempId = 'temp-msg-' + Date.now()
 
@@ -3739,14 +3646,8 @@ async function sendHelpFeedbackMsg() {
             <img src="${userAvt}" style="width:32px;height:32px;border-radius:50%;border:2px solid var(--orange);object-fit:cover;flex-shrink:0" alt="avatar">
         </div>
     `
-    if (msgsContainer) {
-        msgsContainer.insertAdjacentHTML('beforeend', userBubble)
-        msgsContainer.scrollTop = msgsContainer.scrollHeight
-    }
-    if (pageMsgsContainer) {
-        pageMsgsContainer.insertAdjacentHTML('beforeend', userBubble)
-        pageMsgsContainer.scrollTop = pageMsgsContainer.scrollHeight
-    }
+    msgsContainer.insertAdjacentHTML('beforeend', userBubble)
+    msgsContainer.scrollTop = msgsContainer.scrollHeight
 
     // 2. Submit to API backend
     const res = await api.submitSuggestion({
@@ -3781,12 +3682,14 @@ async function sendHelpFeedbackMsg() {
         if (type === 'anime_suggestion') {
             botReply = `🎬 <strong>Thank you so much for sending this anime suggestion!</strong><br>We have logged your suggestion ("<em>${escHtml(txt)}</em>"). Our database team will verify and import it! 🔥`
         } else if (type === 'game_suggestion') {
-            botReply = `🎮 <strong>Thank you for suggesting this video game!</strong><br>We have added ("<em>${escHtml(txt)}</em>") to our gaming library queue! 🔥`
-        } else if (type === 'feature_request' || type === 'feature') {
+            botReply = `🎮 <strong>Thank you so much for sending this game suggestion!</strong><br>We have logged your suggestion ("<em>${escHtml(txt)}</em>"). Our gaming database team will verify and import it! 🔥`
+        } else if (type === 'category_suggestion') {
+            botReply = `🏷️ <strong>Thank you so much for suggesting a new interest/category!</strong><br>We have logged your category idea ("<em>${escHtml(txt)}</em>"). Our product team is actively exploring new hubs to expand Campfire! 🔥`
+        } else if (type === 'feature_request') {
             botReply = `✨ <strong>Thank you so much for sending this feature request!</strong><br>Your idea ("<em>${escHtml(txt)}</em>") has been recorded and sent directly to our development team.`
-        } else if (type === 'bug_report' || type === 'bug') {
+        } else if (type === 'bug_report') {
             botReply = `🐞 <strong>Thank you so much for sending this issue report!</strong><br>Our technical team has logged this issue ("<em>${escHtml(txt)}</em>") and is looking into it right away.`
-        } else if (type === 'help_question' || type === 'help') {
+        } else if (type === 'help_question') {
             botReply = `❓ <strong>Thank you so much for sending your support question!</strong><br>A Campfire support staff member will review your query.`
         }
         toast('Feedback sent successfully! Thank you 🔥', 'ok')
@@ -3801,14 +3704,8 @@ async function sendHelpFeedbackMsg() {
                 </div>
             </div>
         `
-        if (msgsContainer) {
-            msgsContainer.insertAdjacentHTML('beforeend', botBubble)
-            msgsContainer.scrollTop = msgsContainer.scrollHeight
-        }
-        if (pageMsgsContainer) {
-            pageMsgsContainer.insertAdjacentHTML('beforeend', botBubble)
-            pageMsgsContainer.scrollTop = pageMsgsContainer.scrollHeight
-        }
+        msgsContainer.insertAdjacentHTML('beforeend', botBubble)
+        msgsContainer.scrollTop = msgsContainer.scrollHeight
     }, 400)
 }
 
@@ -3850,3 +3747,5 @@ function timeAgo(dateStr) {
     if (diff < 86400000)  return `${Math.floor(diff / 3600000)}h ago`
     return `${Math.floor(diff / 86400000)}d ago`
 }
+
+window.swipeTinderCard = swipeAnime

@@ -1,6 +1,7 @@
 const express = require('express')
 const Suggestion = require('../models/Suggestion')
 const Anime = require('../models/Anime')
+const Game = require('../gaming/models/Game')
 const User = require('../models/User')
 const { requireLogin, adminOnly } = require('../middleware/auth')
 const { checkProfanity, checkRubbishOrOffTopic, sanitizeText } = require('../utils/moderation')
@@ -94,7 +95,12 @@ router.post('/', requireLogin, async (req, res) => {
                 title: new RegExp(keywords.slice(0, 2).join('|'), 'i')
             })
 
-            if (existingSug || existingAnime) {
+            // Check if game already exists in database
+            const existingGame = await Game.findOne({
+                title: new RegExp(keywords.slice(0, 2).join('|'), 'i')
+            })
+
+            if (existingSug || existingAnime || existingGame) {
                 isDuplicate = true
             }
         }
