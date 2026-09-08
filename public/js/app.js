@@ -51,15 +51,69 @@ document.addEventListener('DOMContentLoaded', async () => {
     showLogin()
 })
 
+// Rotating Campfire quotes / website highlights on sign in page
+const CAMPFIRE_QUOTES = [
+    "Every great journey begins around a campfire with people who share your passion.",
+    "Discover trending anime & games, track your backlog, and rate your favorites.",
+    "Personalized AI recommendations tailored specifically to your taste.",
+    "Connect with like-minded fans in real-time community chat and spoiler lounges.",
+    "Compare collections with friends, customize your profile, and explore rich hubs."
+]
+let currentQuoteIdx = 0
+let quoteTimer = null
+
+function renderQuoteDots() {
+    const qdots = document.getElementById('qdots')
+    if (!qdots) return
+    qdots.innerHTML = CAMPFIRE_QUOTES.map((_, i) => `
+        <span class="qdot ${i === currentQuoteIdx ? 'active' : ''}" onclick="setQuote(${i})"></span>
+    `).join('')
+}
+
+function setQuote(idx) {
+    currentQuoteIdx = idx
+    const el = document.getElementById('quote-txt')
+    if (el) {
+        el.classList.add('fade')
+        setTimeout(() => {
+            el.textContent = CAMPFIRE_QUOTES[currentQuoteIdx]
+            el.classList.remove('fade')
+        }, 220)
+    }
+    renderQuoteDots()
+    resetQuoteTimer()
+}
+
+function nextQuote() {
+    const nextIdx = (currentQuoteIdx + 1) % CAMPFIRE_QUOTES.length
+    setQuote(nextIdx)
+}
+
+function resetQuoteTimer() {
+    if (quoteTimer) clearInterval(quoteTimer)
+    quoteTimer = setInterval(nextQuote, 4200)
+}
+
+function initQuotes() {
+    const el = document.getElementById('quote-txt')
+    if (el) {
+        el.textContent = CAMPFIRE_QUOTES[currentQuoteIdx]
+    }
+    renderQuoteDots()
+    resetQuoteTimer()
+}
+
 // Auth flow
 function showLogin() {
     document.getElementById('login-pg').classList.remove('hidden')
     document.getElementById('app-wrap').classList.add('hidden')
     document.getElementById('admin-wrap').classList.add('hidden')
     document.getElementById('navbar').classList.add('hidden')
+    initQuotes()
 }
 
 async function showApp() {
+    if (quoteTimer) { clearInterval(quoteTimer); quoteTimer = null; }
     document.getElementById('login-pg').classList.add('hidden')
     document.getElementById('admin-wrap').classList.add('hidden')
     document.getElementById('app-wrap').classList.remove('hidden')
@@ -113,6 +167,7 @@ async function showApp() {
 }
 
 function showAdmin() {
+    if (quoteTimer) { clearInterval(quoteTimer); quoteTimer = null; }
     document.getElementById('login-pg').classList.add('hidden')
     document.getElementById('app-wrap').classList.add('hidden')
     document.getElementById('navbar').classList.add('hidden')
