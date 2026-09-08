@@ -395,7 +395,7 @@ async function switchHub(newHub) {
         if (!aiRecommendations.length) loadAIRecommendations()
     }
 
-    initDailyTinderDeck()
+    await initDailyTinderDeck()
 
     // reset to homepage on hub select
     goPage('home')
@@ -1200,6 +1200,11 @@ async function initDailyTinderDeck() {
     }
     if (!dataset || !dataset.length) return
 
+    // Clear in-memory deck before evaluating storage for current hub
+    tinderDeck = []
+    tinderIndex = 0
+    tinderRejected = []
+
     const key = getTinderStorageKey()
     let saved = null
     try {
@@ -1221,14 +1226,30 @@ async function initDailyTinderDeck() {
     }
 
     // Update Tinder Deck UI labels based on currentHub
-    const tdTitle = document.querySelector('.td-title')
-    const tdIcon = document.querySelector('.td-icon')
+    const tdTitle = document.getElementById('td-title') || document.querySelector('.td-title')
+    const tdIcon = document.getElementById('td-icon') || document.querySelector('.td-icon')
+    const tdBtn = document.getElementById('tinder-toggle-btn')
+    const tdAcceptBtn = document.getElementById('td-accept-btn') || document.querySelector('.td-actions .btn-s')
     const tdAcceptLbl = document.querySelector('.td-accept-btn .td-btn-lbl')
     const tdAcceptIcon = document.querySelector('.td-accept-btn .td-btn-icon')
+
     if (tdTitle) tdTitle.textContent = currentHub === 'gaming' ? 'Hourly Game Swipe Deck' : 'Hourly Anime Swipe Deck'
     if (tdIcon) tdIcon.textContent = currentHub === 'gaming' ? '🎮' : '🔥'
+    if (tdBtn) {
+        tdBtn.innerHTML = currentHub === 'gaming' ? '🎮 Daily Deck' : '🔥 Daily Deck'
+        tdBtn.title = currentHub === 'gaming' ? 'Daily Game Tinder Deck' : 'Daily Anime Tinder Deck'
+        tdBtn.style.background = currentHub === 'gaming' ? 'linear-gradient(135deg,#8b5cf6,#ec4899)' : 'linear-gradient(135deg,#ff5e62,#ff9966)'
+    }
+    if (tdAcceptBtn) {
+        tdAcceptBtn.textContent = currentHub === 'gaming' ? '🎮' : '❤️'
+        tdAcceptBtn.title = currentHub === 'gaming' ? 'Plan to Play (Like)' : 'Plan to Watch (Like)'
+    }
     if (tdAcceptLbl) tdAcceptLbl.textContent = currentHub === 'gaming' ? 'Plan to Play' : 'Plan to Watch'
     if (tdAcceptIcon) tdAcceptIcon.textContent = currentHub === 'gaming' ? '🎮' : '❤️'
+
+    if (isTinderDeckActive) {
+        renderTinderCard()
+    }
 }
 
 function saveTinderState() {
@@ -1436,11 +1457,11 @@ async function swipeAnime(action) {
 
     const isGaming = currentHub === 'gaming'
 
-    if (action === 'like' || action === 'right') {
+    if (action === 'like' || action === 'right' || action === 'accept') {
         const itemId = item._id
         if (isGaming) {
             const inList = myGamelist.some(w => String(w.game?._id || w.game || w._id || w) === String(itemId))
-            if (!inWL) {
+            if (!inList) {
                 try {
                     const res = await api.addGamelist(itemId, 'plan_to_play')
                     if (res && res.ok && res.data) {
