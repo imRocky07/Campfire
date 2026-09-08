@@ -53,8 +53,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Rotating Campfire quotes on sign in page
 const CAMPFIRE_QUOTES = [
+    "A platform to gather people of the same interest in one place. Because your taste matters. 🔥",
     "Every great journey begins around a campfire.",
-    "A platform to gather people of the same interest in one place. Because your taste matters.",
     "Share your passion, track your backlog, and discover your next obsession.",
     "Connect with like-minded fans across anime, gaming, and entertainment."
 ]
