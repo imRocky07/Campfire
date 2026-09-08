@@ -508,7 +508,7 @@ textarea.finput { resize: vertical; }
     flex: 1;
     background: linear-gradient(180deg, rgba(12, 8, 22, 0.65) 0%, rgba(10, 6, 18, 0.48) 45%, rgba(8, 4, 15, 0.75) 100%),
                 url('/img/campfire_bg.jpg') center/cover no-repeat;
-    display: none; flex-direction: column; justify-content: space-between;
+    display: none; flex-direction: column; justify-content: flex-start;
     padding: 48px; position: relative; overflow: hidden;
     border-right: 1px solid rgba(249, 115, 22, 0.35);
     box-shadow: 12px 0 40px rgba(249, 115, 22, 0.35), 4px 0 15px rgba(245, 158, 11, 0.5);
@@ -547,7 +547,7 @@ textarea.finput { resize: vertical; }
 .lft-name span { color: var(--orange); }
 
 .lft-tagline {
-    margin: 40px 0; max-width: 520px; z-index: 1;
+    margin-top: 50px; max-width: 520px; z-index: 1;
 }
 .ltag-main {
     font-size: 24px; font-weight: 800; color: #ffffff;
