@@ -95,8 +95,8 @@ function resetQuoteTimer() {
 
 function initQuotes() {
     const el = document.getElementById('quote-txt')
-    if (el && !el.textContent.trim()) {
-        el.textContent = CAMPFIRE_QUOTES[0]
+    if (el) {
+        el.textContent = CAMPFIRE_QUOTES[currentQuoteIdx]
     }
     renderQuoteDots()
     resetQuoteTimer()
@@ -112,6 +112,7 @@ function showLogin() {
 }
 
 async function showApp() {
+    if (quoteTimer) { clearInterval(quoteTimer); quoteTimer = null; }
     document.getElementById('login-pg').classList.add('hidden')
     document.getElementById('admin-wrap').classList.add('hidden')
     document.getElementById('app-wrap').classList.remove('hidden')
@@ -165,6 +166,7 @@ async function showApp() {
 }
 
 function showAdmin() {
+    if (quoteTimer) { clearInterval(quoteTimer); quoteTimer = null; }
     document.getElementById('login-pg').classList.add('hidden')
     document.getElementById('app-wrap').classList.add('hidden')
     document.getElementById('navbar').classList.add('hidden')

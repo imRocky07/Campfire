@@ -539,28 +539,29 @@ textarea.finput { resize: vertical; }
 .lft-name span { color: var(--orange); }
 
 .lft-quote-wrap {
-    margin: 36px 0;
-    max-width: 520px;
+    margin-top: auto;
+    max-width: 480px;
     z-index: 1;
     position: relative;
+    padding-top: 24px;
 }
 .lft-q-mark {
-    font-size: 50px;
+    font-size: 46px;
     font-family: Georgia, serif;
     color: var(--orange);
     opacity: 0.55;
     line-height: 1;
-    margin-bottom: -8px;
+    margin-bottom: -6px;
     user-select: none;
 }
 .lft-q-text {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     color: #ffffff;
     line-height: 1.45;
     font-style: italic;
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
-    min-height: 70px;
+    min-height: 60px;
     transition: opacity 0.25s ease, transform 0.25s ease;
 }
 .lft-q-text.fade {
@@ -570,7 +571,7 @@ textarea.finput { resize: vertical; }
 .qdots {
     display: flex;
     gap: 8px;
-    margin-top: 18px;
+    margin-top: 16px;
 }
 .qdot {
     width: 8px;
@@ -584,30 +585,9 @@ textarea.finput { resize: vertical; }
     background: rgba(249, 115, 22, 0.6);
 }
 .qdot.active {
-    width: 26px;
+    width: 24px;
     background: var(--orange);
     box-shadow: 0 0 10px rgba(249, 115, 22, 0.6);
-}
-
-.lft-stats {
-    display: flex;
-    gap: 32px;
-    z-index: 1;
-    padding-top: 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-.lstat-val {
-    font-size: 22px;
-    font-weight: 900;
-    color: #ffffff;
-}
-.lstat-lbl {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--txt3);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-top: 3px;
 }
 
 .rgt {
